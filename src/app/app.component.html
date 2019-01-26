@@ -1,0 +1,197 @@
+<div *ngIf="afAuth.user | async as user; else showLogin">
+  <mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <span>PingisAppen</span>
+
+      <button mat-button [matMenuTriggerFor]="tournamentMenu">Turneringar</button>
+      <span class="example-spacer"></span>
+      <!-- <mat-icon class="example-icon">favorite</mat-icon>
+      <mat-icon class="example-icon" (click)="logout()">toggle_off</mat-icon> -->
+
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+
+
+  <mat-menu #tournamentMenu="matMenu">
+    <button *ngFor="let t of tournaments$ | async" (click)="selectedTournamentId$.next(t.id)" mat-menu-item>{{t.name}}</button>
+  </mat-menu>
+
+
+  <mat-menu #menu="matMenu">
+    <button *ngIf="tournament$ | async as tournament" mat-menu-item (click)="removeTournament(tournament)">
+      <mat-icon>delete</mat-icon>
+      <span>Ta bort Turnering</span>
+    </button>
+    <button *ngIf="tournament$ | async as tournament" mat-menu-item (click)="makeTournamentDefault(tournament)">
+      <mat-icon>stars</mat-icon>
+      <span>Välj som default-turnering</span>
+    </button>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>toggle_off</mat-icon>
+      <span>Logga ut</span>
+    </button>
+  </mat-menu>
+  <div *ngIf="tournament$ | async as tournament">
+    <mat-card>
+      <h3>{{tournament.name}}</h3>
+      <mat-tab-group>
+        <mat-tab label="Tabell">
+          <mat-card>
+            <mat-card-content>
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      Lag
+                    </th>
+                    <th>M</th>
+                    <th>+/-</th>
+                    <th>PO</th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let team of pointSummary$ | async">
+                    <td>
+                      <div *ngIf="teamToChangeId !== team.teamId">
+                        {{team.name}}
+                      </div>
+                      <div *ngIf="teamToChangeId === team.teamId">
+
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
+                          namn på lag</button>
+                        <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
+                      </div>
+                    </td>
+                    <td>{{team.playedMatchesCount}}</td>
+                    <td>{{team.ballDifference >= 0 ? '+' : '' }}{{team.ballDifference}}</td>
+                    <td><b>{{team.score}}</b></td>
+                    <td><button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
+                        <mat-icon class="example-icon">delete</mat-icon>
+                      </button></td>
+                    <td><button mat-icon-button type="button" (click)="startUpdateTeam(team)">
+                        <mat-icon class="example-icon">edit</mat-icon>
+                      </button></td>
+                  </tr>
+                </tbody>
+              </table>
+
+
+              <br>
+
+              <mat-form-field class="example-full-width">
+                <input matInput placeholder="Lagnamn" type="text" [(ngModel)]="newTeamName" name="newTeamName" />
+              </mat-form-field>
+              <button mat-raised-button color="primary" type="button" [disabled]="!newTeamName" (click)="addTeam()">Lägg
+                till lag</button>
+
+
+            </mat-card-content>
+          </mat-card>
+        </mat-tab>
+        <mat-tab label="Matcher">
+          <mat-card>
+            <mat-card-content>
+              <mat-form-field class="example-full-width">
+                <input matInput type="text" placeholder="Sök" [(ngModel)]="searchText" (ngModelChange)="matchesToPlayFilter$.next($event)" />
+              </mat-form-field>
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                      Lag 1
+                    </th>
+                    <th>poäng</th>
+                    <th>Lag 2</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let match of matchesToPlayFiltered$ | async; let ind = index">
+                    <td>{{ind + 1}}</td>
+                    <td>{{match.team1.name}}</td>
+                    <td>
+                      <div *ngIf="!!match.matchId">
+                        {{match.team1Score}}
+                        -
+                        {{match.team2Score}}
+                      </div>
+                      <div *ngIf="matchBeingAdded === match">
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="poäng för: {{match.team1.name}}" type="number" [(ngModel)]="team1Score"
+                            name="team1Score" />
+                        </mat-form-field>
+
+                        <mat-form-field class="example-full-width">
+                          <input matInput placeholder="poäng för: {{match.team2.name}}" type="number" [(ngModel)]="team2Score"
+                            name="team2Score" />
+                        </mat-form-field>
+                        <button mat-raised-button color="primary" type="button" (click)="addMatch()">Lägg till match</button>
+                        <button mat-raised-button color="warn" type="button" (click)="cancelAddMatch()">Avbryt</button>
+                      </div>
+                    </td>
+                    <td>{{match.team2.name}}</td>
+                    <td>
+                      <button mat-icon-button color="warn" *ngIf="!!match.matchId" type="button" (click)="removeMatch(match.matchId)">
+                        <mat-icon class="example-icon">delete</mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" *ngIf="!match.matchId" type="button" (click)="startAddMatch(match)">
+                        <mat-icon class="example-icon">add_circle</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </mat-card-content>
+
+          </mat-card>
+        </mat-tab>
+        <mat-tab label="Inställningar för turnering">
+          <mat-card>
+            <form class="example-form">
+              <mat-form-field class="example-full-width">
+                <input matInput type="text" placeholder="Namn" [(ngModel)]="tournament.name" (ngModelChange)="changeNameOfTurnament(tournament.name)"
+                  name="tournamentName" />
+              </mat-form-field>
+              <mat-form-field class="example-full-width">
+                <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
+                  [ngModel]="numberOfRounds$ | async" (ngModelChange)="changeNumberOfRounds($event)" />
+              </mat-form-field>
+            </form>
+          </mat-card>
+        </mat-tab>
+        <mat-tab label="Lägg till ny turnering">
+          <mat-card>
+            <form class="example-form">
+              <mat-form-field class="example-full-width">
+                <input matInput type="text" placeholder="Namn på ny turnering" [(ngModel)]="newTournamentName" name="newTournamentName" />
+              </mat-form-field>
+            </form>
+            <mat-card-actions>
+              <button mat-raised-button color="primary" type="button" [disabled]="!newTournamentName" (click)="addTournament()">Skapa</button>
+            </mat-card-actions>
+          </mat-card>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+</div>
+
+<ng-template #showLogin>
+  <p>Logga in först</p>
+  <input type="text" [(ngModel)]="email" name="email" />
+  <input type="password" [(ngModel)]="password" name="password" />
+
+  <button (click)="login()">logga in</button>
+</ng-template>
