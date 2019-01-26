@@ -35,66 +35,52 @@
     </button>
   </mat-menu>
   <div *ngIf="tournament$ | async as tournament">
-    <mat-card>
-      <h3>{{tournament.name}}</h3>
+    <div>
+      <h3 style="padding-left: 16px">{{tournament.name}}</h3>
       <mat-tab-group>
         <mat-tab label="Tabell">
-          <mat-card>
-            <mat-card-content>
-              <table>
-                <thead>
-                  <tr>
-                    <th>
-                      Lag
-                    </th>
-                    <th>M</th>
-                    <th>+/-</th>
-                    <th>PO</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let team of pointSummary$ | async">
-                    <td>
-                      <div *ngIf="teamToChangeId !== team.teamId">
-                        {{team.name}}
-                      </div>
-                      <div *ngIf="teamToChangeId === team.teamId">
+          <br>
+          <table class="example-full-width">
+            <thead>
+              <tr>
+                <th>
+                  Lag
+                </th>
+                <th>M</th>
+                <th>V</th>
+                <th>O(V)</th>
+                <th>O(F)</th>
+                <th>F</th>
+                <th>+/-</th>
+                <th>PO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let team of pointSummary$ | async">
+                <td>
+                  <div *ngIf="teamToChangeId !== team.teamId">
+                    {{team.name}}
+                  </div>
+                  <div *ngIf="teamToChangeId === team.teamId">
 
-                        <mat-form-field class="example-full-width">
-                          <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
-                        </mat-form-field>
-                        <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
-                          namn på lag</button>
-                        <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
-                      </div>
-                    </td>
-                    <td>{{team.playedMatchesCount}}</td>
-                    <td>{{team.ballDifference >= 0 ? '+' : '' }}{{team.ballDifference}}</td>
-                    <td><b>{{team.score}}</b></td>
-                    <td><button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
-                        <mat-icon class="example-icon">delete</mat-icon>
-                      </button></td>
-                    <td><button mat-icon-button type="button" (click)="startUpdateTeam(team)">
-                        <mat-icon class="example-icon">edit</mat-icon>
-                      </button></td>
-                  </tr>
-                </tbody>
-              </table>
-
-
-              <br>
-
-              <mat-form-field class="example-full-width">
-                <input matInput placeholder="Lagnamn" type="text" [(ngModel)]="newTeamName" name="newTeamName" />
-              </mat-form-field>
-              <button mat-raised-button color="primary" type="button" [disabled]="!newTeamName" (click)="addTeam()">Lägg
-                till lag</button>
-
-
-            </mat-card-content>
-          </mat-card>
+                    <mat-form-field class="example-full-width">
+                      <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
+                    </mat-form-field>
+                    <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
+                      namn på lag</button>
+                    <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
+                  </div>
+                </td>
+                <td>{{team.playedMatchesCount}}</td>
+                <td>{{team.gameWinCount}}</td>
+                <td>{{team.gameWinOvertimeCount}}</td>
+                <td>{{team.gameLoseOvertimeCount}}</td>
+                <td>{{team.gameLoseCount}}</td>
+                <td>{{team.ballDifference >= 0 ? '+' : '' }}{{team.ballDifference}}</td>
+                <td><b>{{team.score}}</b></td>
+              </tr>
+            </tbody>
+          </table>
         </mat-tab>
         <mat-tab label="Matcher">
           <mat-card>
@@ -159,16 +145,79 @@
         </mat-tab>
         <mat-tab label="Inställningar för turnering">
           <mat-card>
-            <form class="example-form">
-              <mat-form-field class="example-full-width">
-                <input matInput type="text" placeholder="Namn" [(ngModel)]="tournament.name" (ngModelChange)="changeNameOfTurnament(tournament.name)"
-                  name="tournamentName" />
-              </mat-form-field>
-              <mat-form-field class="example-full-width">
-                <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
-                  [ngModel]="numberOfRounds$ | async" (ngModelChange)="changeNumberOfRounds($event)" />
-              </mat-form-field>
-            </form>
+            <mat-accordion>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Lag
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    Hantera lagen i turneringen
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+                <table class="example-full-width">
+                  <thead>
+                    <tr>
+                      <th>
+                        Lag
+                      </th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let team of pointSummary$ | async">
+                      <td>
+                        <div *ngIf="teamToChangeId !== team.teamId">
+                          {{team.name}}
+                          <button mat-icon-button type="button" (click)="startUpdateTeam(team)">
+                            <mat-icon class="example-icon">edit</mat-icon>
+                          </button>
+                        </div>
+                        <div *ngIf="teamToChangeId === team.teamId">
+
+                          <mat-form-field class="example-full-width">
+                            <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
+                          </mat-form-field>
+                          <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
+                            namn på lag</button>
+                          <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
+                        </div>
+                      </td>
+                      <td>
+                        <button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
+                          <mat-icon class="example-icon">delete</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br>
+                <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Lagnamn på nytt lag" type="text" [(ngModel)]="newTeamName" name="newTeamName" />
+                </mat-form-field>
+                <button mat-raised-button color="primary" type="button" [disabled]="!newTeamName" (click)="addTeam()">
+                  <mat-icon>add</mat-icon>
+                  Lägg till lag
+                </button>
+              </mat-expansion-panel>
+              <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Övriga inställningar
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <form class="example-form">
+                  <mat-form-field class="example-full-width">
+                    <input matInput type="text" placeholder="Namn" [(ngModel)]="tournament.name" (ngModelChange)="changeNameOfTurnament(tournament.name)"
+                      name="tournamentName" />
+                  </mat-form-field>
+                  <mat-form-field class="example-full-width">
+                    <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
+                      [ngModel]="numberOfRounds$ | async" (ngModelChange)="changeNumberOfRounds($event)" />
+                  </mat-form-field>
+                </form>
+              </mat-expansion-panel>
+            </mat-accordion>
           </mat-card>
         </mat-tab>
         <mat-tab label="Lägg till ny turnering">
@@ -184,10 +233,9 @@
           </mat-card>
         </mat-tab>
       </mat-tab-group>
-    </mat-card>
+    </div>
   </div>
 </div>
-
 <ng-template #showLogin>
   <p>Logga in först</p>
   <input type="text" [(ngModel)]="email" name="email" />

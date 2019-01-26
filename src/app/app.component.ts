@@ -14,6 +14,7 @@ import { Match } from './Match';
 import { MatchInFireStore } from './MatchInFireStore';
 import { TeamScore } from './TeamScore';
 import { GlobalSettings } from './GlobalSettings';
+import { GameStats } from './GameStats';
 
 @Component({
   selector: 'app-root',
@@ -58,7 +59,7 @@ export class AppComponent implements OnInit {
     globalSettings.valueChanges()
       .pipe(take(1))
       .subscribe((settings: GlobalSettings) => this.selectedTournamentId$.next(settings.defaultTournamentId));
-  
+
     this.tournaments$ = tournamentsRef.snapshotChanges()
       .pipe(
         map(actions => actions.map(t => (<TournamentWithId>{
@@ -103,6 +104,10 @@ export class AppComponent implements OnInit {
                   name: t.payload.doc.data().name,
                   score: 0,
                   playedMatchesCount: 0,
+                  gameWinCount: 0,
+                  gameWinOvertimeCount: 0,
+                  gameLoseOvertimeCount: 0,
+                  gameLoseCount: 0,
                   ballDifference: 0,
                   playedMatches: []
                 }
@@ -160,6 +165,10 @@ export class AppComponent implements OnInit {
                     score: 0,
                     playedMatchesCount: 0,
                     playedMatches: [],
+                    gameWinCount: 0,
+                    gameWinOvertimeCount: 0,
+                    gameLoseOvertimeCount: 0,
+                    gameLoseCount: 0,
                     ballDifference: 0
                   };
 
@@ -168,6 +177,10 @@ export class AppComponent implements OnInit {
                     teamId: match.team2Id,
                     score: 0,
                     playedMatchesCount: 0,
+                    gameWinCount: 0,
+                    gameWinOvertimeCount: 0,
+                    gameLoseOvertimeCount: 0,
+                    gameLoseCount: 0,
                     playedMatches: [],
                     ballDifference: 0
                   };
@@ -183,6 +196,10 @@ export class AppComponent implements OnInit {
                   name: t.payload.doc.data().name,
                   score: 0,
                   playedMatches: [],
+                  gameWinCount: 0,
+                  gameWinOvertimeCount: 0,
+                  gameLoseOvertimeCount: 0,
+                  gameLoseCount: 0,
                   ballDifference: 0,
                   teamId: t.payload.doc.id,
                   playedMatchesCount: 0
@@ -222,11 +239,17 @@ export class AppComponent implements OnInit {
   }
 
   private getSomething(myTeam: TeamScore, myTeamScore: number, otherTeamsScore: number, matchId: string): TeamScore {
+    const gameStats = new GameStats(myTeamScore, otherTeamsScore);
+
     let newTeamScore: TeamScore = {
       teamId: myTeam.teamId,
       name: myTeam.name,
       score: myTeam.score + this.getPointsForTeam(myTeamScore, otherTeamsScore),
       playedMatchesCount: myTeam.playedMatchesCount + 1,
+      gameWinCount: myTeam.gameWinCount + gameStats.wins,
+      gameWinOvertimeCount: myTeam.gameWinOvertimeCount + gameStats.overtimeWins,
+      gameLoseOvertimeCount: myTeam.gameLoseOvertimeCount + gameStats.overtimeLoses,
+      gameLoseCount: myTeam.gameLoseCount + gameStats.loses,
       playedMatches: myTeam.playedMatches.concat(matchId),
       ballDifference: myTeam.ballDifference + this.getBollDifference(myTeamScore, otherTeamsScore)
     };
@@ -439,7 +462,7 @@ export class AppComponent implements OnInit {
 
   changeNameOfTurnament(name: string) {
     if (!!name) {
-      this.tournamentRef.ref.update({name: name});
+      this.tournamentRef.ref.update({ name: name });
       this.snackBar.open("Namnet är ändrat!", null, {
         duration: 2000,
       });

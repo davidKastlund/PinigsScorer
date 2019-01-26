@@ -2,10 +2,12 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule,
 MatCardModule,
 MatMenuModule,
-MatTabsModule } from '@angular/material';
+MatTabsModule,
+MatExpansionModule } from '@angular/material';
 
+const materialModules = [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule, MatExpansionModule];
 @NgModule({
-  imports: [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule],
-  exports: [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule],
+  imports: materialModules,
+  exports: materialModules,
 })
 export class CustomMaterialModuleModule { }

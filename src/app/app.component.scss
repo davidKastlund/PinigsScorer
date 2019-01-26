@@ -16,14 +16,14 @@
     flex: 1 1 auto;
   }
 
-  tbody td {
+  tbody td, th {
     padding: 5px;
   }
 
   tbody tr:nth-child(odd){
     background-color: #efefef;
   }
-  
+
    tbody tr:nth-child(odd) td {
     border-color: lightgrey;
   }
@@ -31,4 +31,8 @@
   table {
     border-collapse: collapse;
     border-spacing: 0;
+}
+
+th {
+  text-align: left;
 }
