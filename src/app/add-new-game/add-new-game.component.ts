@@ -1,11 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { AddNewGameDialogData } from './AddNewGameDialogData';
-
-export interface AddNewGameDialogResult {
-  team1Score: number,
-  team2Score: number
-}
+import { AddNewGameDialogResult } from './AddNewGameDialogResult';
 
 @Component({
   selector: 'app-add-new-game',

@@ -16,7 +16,8 @@ import { TeamScore } from './TeamScore';
 import { GlobalSettings } from './GlobalSettings';
 import { GameStats } from './GameStats';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
-import { AddNewGameComponent, AddNewGameDialogResult } from './add-new-game/add-new-game.component';
+import { AddNewGameComponent } from './add-new-game/add-new-game.component';
+import { AddNewGameDialogResult } from "./add-new-game/AddNewGameDialogResult";
 import { AddNewGameDialogData } from "./add-new-game/AddNewGameDialogData";
 
 @Component({
