@@ -10,10 +10,14 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { environment } from 'src/environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CustomMaterialModuleModule } from './custom-material-module/custom-material-module.module';
+import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
+import { AddNewGameComponent } from './add-new-game/add-new-game.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CreateNewTournamtentComponent,
+    AddNewGameComponent
   ],
   imports: [
     BrowserModule,
@@ -25,6 +29,10 @@ import { CustomMaterialModuleModule } from './custom-material-module/custom-mate
     AngularFireStorageModule, // imports firebase/storage only needed for storage features 
     BrowserAnimationsModule,
     CustomMaterialModuleModule
+  ],
+  entryComponents: [
+    CreateNewTournamtentComponent,
+    AddNewGameComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

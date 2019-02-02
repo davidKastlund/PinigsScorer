@@ -21,6 +21,10 @@
 
 
   <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="addTournamentFromModal()">
+      <mat-icon>add</mat-icon>
+      <span>Lägg till ny turnering</span>
+    </button>
     <button *ngIf="tournament$ | async as tournament" mat-menu-item (click)="removeTournament(tournament)">
       <mat-icon>delete</mat-icon>
       <span>Ta bort Turnering</span>
@@ -112,26 +116,13 @@
                         -
                         {{match.team2Score}}
                       </div>
-                      <div *ngIf="matchBeingAdded === match">
-                        <mat-form-field class="example-full-width">
-                          <input matInput placeholder="poäng för: {{match.team1.name}}" type="number" [(ngModel)]="team1Score"
-                            name="team1Score" />
-                        </mat-form-field>
-
-                        <mat-form-field class="example-full-width">
-                          <input matInput placeholder="poäng för: {{match.team2.name}}" type="number" [(ngModel)]="team2Score"
-                            name="team2Score" />
-                        </mat-form-field>
-                        <button mat-raised-button color="primary" type="button" (click)="addMatch()">Lägg till match</button>
-                        <button mat-raised-button color="warn" type="button" (click)="cancelAddMatch()">Avbryt</button>
-                      </div>
                     </td>
                     <td>{{match.team2.name}}</td>
                     <td>
                       <button mat-icon-button color="warn" *ngIf="!!match.matchId" type="button" (click)="removeMatch(match.matchId)">
                         <mat-icon class="example-icon">delete</mat-icon>
                       </button>
-                      <button mat-icon-button color="primary" *ngIf="!match.matchId" type="button" (click)="startAddMatch(match)">
+                      <button mat-icon-button color="primary" *ngIf="!match.matchId" type="button" (click)="addMatchFromDialog(match)">
                         <mat-icon class="example-icon">add_circle</mat-icon>
                       </button>
                     </td>
@@ -218,18 +209,6 @@
                 </form>
               </mat-expansion-panel>
             </mat-accordion>
-          </mat-card>
-        </mat-tab>
-        <mat-tab label="Lägg till ny turnering">
-          <mat-card>
-            <form class="example-form">
-              <mat-form-field class="example-full-width">
-                <input matInput type="text" placeholder="Namn på ny turnering" [(ngModel)]="newTournamentName" name="newTournamentName" />
-              </mat-form-field>
-            </form>
-            <mat-card-actions>
-              <button mat-raised-button color="primary" type="button" [disabled]="!newTournamentName" (click)="addTournament()">Skapa</button>
-            </mat-card-actions>
           </mat-card>
         </mat-tab>
       </mat-tab-group>

@@ -6,7 +6,7 @@ import { map, combineLatest, tap, take } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { Tournament } from "./Tournament";
 import { TournamentWithId } from './TournamentWithId';
 import { Team } from './Team';
@@ -15,6 +15,9 @@ import { MatchInFireStore } from './MatchInFireStore';
 import { TeamScore } from './TeamScore';
 import { GlobalSettings } from './GlobalSettings';
 import { GameStats } from './GameStats';
+import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
+import { AddNewGameComponent, AddNewGameDialogResult } from './add-new-game/add-new-game.component';
+import { AddNewGameDialogData } from "./add-new-game/AddNewGameDialogData";
 
 @Component({
   selector: 'app-root',
@@ -28,10 +31,6 @@ export class AppComponent implements OnInit {
   pointSummary$: Observable<TeamScore[]>;
   tournament$: Observable<TournamentWithId>;
   tournamentRef: AngularFirestoreDocument<Tournament>;
-  team1Score: number;
-  team2Score: number;
-  team1Id: string;
-  team2Id: string;
   teamToChangeId: string;
   teamName: string;
   email: string;
@@ -41,15 +40,14 @@ export class AppComponent implements OnInit {
   matchesToPlayFilter$ = new BehaviorSubject<string>(undefined);
   numberOfRounds$ = new BehaviorSubject<number>(1);
   matchesToPlayFiltered$: Observable<Match[]>;
-  matchBeingAdded: Match;
   tournaments$: Observable<TournamentWithId[]>;
   selectedTournamentId$ = new BehaviorSubject<string>("gazBtm1efiIZ91nL5ffk");
-  newTournamentName: string;
   globalSettingsRef: firebase.firestore.DocumentReference;
 
   constructor(private db: AngularFirestore,
     public afAuth: AngularFireAuth,
-    private snackBar: MatSnackBar) {
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog) {
 
     let tournamentsRef = db.collection<Tournament>("tournaments");
 
@@ -260,26 +258,29 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  addMatch(): void {
-    const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
-    let match: MatchInFireStore = {
-      date: timestamp,
-      team1: this.tournamentRef.collection("teams").doc(this.matchBeingAdded.team1Id).ref,
-      team2: this.tournamentRef.collection("teams").doc(this.matchBeingAdded.team2Id).ref,
-      team1Score: +this.team1Score,
-      team2Score: +this.team2Score
+  addMatchFromDialog(match: Match) {
+    const dialogData: AddNewGameDialogData = {
+      team1Name: match.team1.name,
+      team2Name: match.team2.name,
     }
-    this.tournamentRef.collection("matches").add(match);
+    let dialogRef = this.dialog.open(AddNewGameComponent, { width: "600px", data: dialogData });
 
-    this.team1Score = undefined;
-    this.team2Score = undefined;
-    this.snackBar.open("Matchen är tillagd!", null, {
-      duration: 2000,
-    });
-  }
-
-  cancelAddMatch() {
-    this.matchBeingAdded = undefined;
+    dialogRef.afterClosed().subscribe((result: AddNewGameDialogResult) => {
+      if (!!result) {
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
+        let newMatch: MatchInFireStore = {
+          date: timestamp,
+          team1: this.tournamentRef.collection("teams").doc(match.team1Id).ref,
+          team2: this.tournamentRef.collection("teams").doc(match.team2Id).ref,
+          team1Score: result.team1Score,
+          team2Score: result.team2Score
+        }
+        this.tournamentRef.collection("matches").add(newMatch);
+        this.snackBar.open("Matchen är tillagd!", null, {
+          duration: 2000,
+        });
+      }
+    })
   }
 
   removeMatch(matchId: string) {
@@ -326,11 +327,21 @@ export class AppComponent implements OnInit {
     });
   }
 
-  addTournament() {
-    this.db.collection<Tournament>("tournaments").add({ name: this.newTournamentName, numberOfRounds: 1 }).then(ref => this.selectedTournamentId$.next(ref.id));
-    this.newTournamentName = undefined;
-    this.snackBar.open("Turneringen är tillagt!", null, {
-      duration: 2000,
+  addTournamentFromModal() {
+    const dialogRef = this.dialog.open(CreateNewTournamtentComponent, {
+      width: '250px'
+    });
+
+    dialogRef.afterClosed().subscribe(newTournamteName => {
+      if (!!newTournamteName) {
+        this.db.collection<Tournament>("tournaments").add({ name: newTournamteName, numberOfRounds: 1 })
+          .then(ref => {
+            this.selectedTournamentId$.next(ref.id);
+            this.snackBar.open("Turneringen är tillagt!", null, {
+              duration: 2000,
+            });
+          });
+      }
     });
   }
 
@@ -454,10 +465,6 @@ export class AppComponent implements OnInit {
       }
       return match;
     })
-  }
-
-  startAddMatch(match: Match) {
-    this.matchBeingAdded = match;
   }
 
   changeNameOfTurnament(name: string) {

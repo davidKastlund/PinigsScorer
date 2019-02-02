@@ -3,9 +3,11 @@ import { MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, 
 MatCardModule,
 MatMenuModule,
 MatTabsModule,
-MatExpansionModule } from '@angular/material';
+MatExpansionModule, 
+MatDialogModule} from '@angular/material';
 
-const materialModules = [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule, MatExpansionModule];
+const materialModules = [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule, MatExpansionModule,
+MatDialogModule];
 @NgModule({
   imports: materialModules,
   exports: materialModules,
