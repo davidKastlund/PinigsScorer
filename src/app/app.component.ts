@@ -290,7 +290,8 @@ export class AppComponent implements OnInit {
 
   removeMatch(matchId: string) {
     const data = (<ConfirmDialogData>{
-      title: "Vill du ta bort matchen?"
+      title: "Vill du ta bort matchen?",
+      okButtonText: "Ja ta bort matchen",
     });
     let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
 
@@ -306,7 +307,7 @@ export class AppComponent implements OnInit {
 
   removeTeam(teamScore: TeamScore) {
     const data = (<ConfirmDialogData>{
-      title: "Vill du ta bort laget?"
+      title: `Vill du ta bort ${teamScore.name}?`
     });
     let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
 
