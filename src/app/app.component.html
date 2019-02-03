@@ -61,20 +61,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let team of pointSummary$ | async">
-                <td>
-                  <div *ngIf="teamToChangeId !== team.teamId">
-                    {{team.name}}
-                  </div>
-                  <div *ngIf="teamToChangeId === team.teamId">
-
-                    <mat-form-field class="example-full-width">
-                      <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
-                    </mat-form-field>
-                    <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
-                      namn på lag</button>
-                    <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
-                  </div>
-                </td>
+                <td>{{team.name}}</td>
                 <td>{{team.playedMatchesCount}}</td>
                 <td>{{team.gameWinCount}}</td>
                 <td>{{team.gameWinOvertimeCount}}</td>
@@ -157,24 +144,11 @@
                   </thead>
                   <tbody>
                     <tr *ngFor="let team of pointSummary$ | async">
+                      <td>{{team.name}}</td>
                       <td>
-                        <div *ngIf="teamToChangeId !== team.teamId">
-                          {{team.name}}
-                          <button mat-icon-button type="button" (click)="startUpdateTeam(team)">
-                            <mat-icon class="example-icon">edit</mat-icon>
-                          </button>
-                        </div>
-                        <div *ngIf="teamToChangeId === team.teamId">
-
-                          <mat-form-field class="example-full-width">
-                            <input matInput placeholder="Namn" type="text" [(ngModel)]="teamName" name="teamName" />
-                          </mat-form-field>
-                          <button mat-raised-button color="primary" type="button" [disabled]="!teamName" (click)="changeNameOfTeam(teamName, teamToChangeId)">Ändra
-                            namn på lag</button>
-                          <button mat-raised-button color="warn" type="button" (click)="teamToChangeId = undefined">Avbryt</button>
-                        </div>
-                      </td>
-                      <td>
+                        <button mat-icon-button type="button" (click)="startUpdateTeam(team)">
+                          <mat-icon class="example-icon">edit</mat-icon>
+                        </button>
                         <button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
                           <mat-icon class="example-icon">delete</mat-icon>
                         </button>

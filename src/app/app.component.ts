@@ -19,6 +19,10 @@ import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-n
 import { AddNewGameComponent } from './add-new-game/add-new-game.component';
 import { AddNewGameDialogResult } from "./add-new-game/AddNewGameDialogResult";
 import { AddNewGameDialogData } from "./add-new-game/AddNewGameDialogData";
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
+import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
+import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
 
 @Component({
   selector: 'app-root',
@@ -32,8 +36,6 @@ export class AppComponent implements OnInit {
   pointSummary$: Observable<TeamScore[]>;
   tournament$: Observable<TournamentWithId>;
   tournamentRef: AngularFirestoreDocument<Tournament>;
-  teamToChangeId: string;
-  teamName: string;
   email: string;
   password: string;
   newTeamName: string;
@@ -285,30 +287,43 @@ export class AppComponent implements OnInit {
   }
 
   removeMatch(matchId: string) {
-    if (confirm("Är du säker?")) {
-      this.tournamentRef.collection("matches").doc(matchId).delete();
-      this.snackBar.open("Matchen är borttagen!", null, {
-        duration: 2000,
-      });
-    }
+    const data = (<ConfirmDialogData>{
+      title: "Vill du ta bort matchen?"
+    });
+    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.tournamentRef.collection("matches").doc(matchId).delete();
+        this.snackBar.open("Matchen är borttagen!", null, {
+          duration: 2000,
+        });
+      }
+    });
   }
 
   removeTeam(teamScore: TeamScore) {
-    if (confirm("Är du säker?")) {
-      let batch = this.db.firestore.batch();
-      batch.delete(this.tournamentRef.collection("teams").doc(teamScore.teamId).ref);
+    const data = (<ConfirmDialogData>{
+      title: "Vill du ta bort laget?"
+    });
+    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
 
-      teamScore.playedMatches.forEach(matchId => {
-        batch.delete(this.tournamentRef.collection("matches").doc(matchId).ref);
-      })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        let batch = this.db.firestore.batch();
+        batch.delete(this.tournamentRef.collection("teams").doc(teamScore.teamId).ref);
 
-      batch.commit();
+        teamScore.playedMatches.forEach(matchId => {
+          batch.delete(this.tournamentRef.collection("matches").doc(matchId).ref);
+        })
 
-      this.teamToChangeId = undefined;
-      this.snackBar.open("Laget är borttaget!", null, {
-        duration: 2000,
-      });
-    }
+        batch.commit();
+
+        this.snackBar.open("Laget är borttaget!", null, {
+          duration: 2000,
+        });
+      }
+    });
   }
 
   changeNumberOfRounds(numberOfRounds: number) {
@@ -347,13 +362,20 @@ export class AppComponent implements OnInit {
   }
 
   removeTournament(tournament: TournamentWithId) {
-    if (confirm("Är du säker?")) {
-      this.selectedTournamentId$.next(undefined);
-      this.db.collection<Tournament>("tournaments").doc(tournament.id).delete();
-      this.snackBar.open("Turneringen är borttagen!", null, {
-        duration: 2000,
-      });
-    }
+    const data = (<ConfirmDialogData>{
+      title: "Vill du ta bort turneringen?"
+    });
+    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedTournamentId$.next(undefined);
+        this.db.collection<Tournament>("tournaments").doc(tournament.id).delete();
+        this.snackBar.open("Turneringen är borttagen!", null, {
+          duration: 2000,
+        });
+      }
+    });
   }
 
   makeTournamentDefault(tournament: TournamentWithId) {
@@ -363,18 +385,20 @@ export class AppComponent implements OnInit {
     });
   }
 
-  changeNameOfTeam(teamName: string, teamId: string) {
-    this.tournamentRef.collection<Team>("teams").doc(teamId).update({ name: teamName });
-    this.teamName = undefined;
-    this.teamToChangeId = undefined;
-    this.snackBar.open("Namnet är ändrat!", null, {
-      duration: 2000,
-    });
-  }
-
   startUpdateTeam(team: TeamScore) {
-    this.teamToChangeId = team.teamId;
-    this.teamName = team.name;
+    const data: EditTeamDialogData = {
+      name: team.name
+    }
+    this.dialog.open(EditTeamDialogComponent, {width: "600px", data})
+      .afterClosed()
+      .subscribe((result: EditTeamDialogData) => {
+        if (!!result) {
+          this.tournamentRef.collection<Team>("teams").doc(team.teamId).update({ name: result.name });
+          this.snackBar.open("Laget är uppdaterat!", null, {
+            duration: 2000,
+          });
+        }
+      });
   }
 
   login() {

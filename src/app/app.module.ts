@@ -12,12 +12,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CustomMaterialModuleModule } from './custom-material-module/custom-material-module.module';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
 import { AddNewGameComponent } from './add-new-game/add-new-game.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CreateNewTournamtentComponent,
-    AddNewGameComponent
+    AddNewGameComponent,
+    ConfirmDialogComponent,
+    EditTeamDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -32,7 +36,9 @@ import { AddNewGameComponent } from './add-new-game/add-new-game.component';
   ],
   entryComponents: [
     CreateNewTournamtentComponent,
-    AddNewGameComponent
+    AddNewGameComponent,
+    ConfirmDialogComponent,
+    EditTeamDialogComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
