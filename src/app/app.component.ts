@@ -36,8 +36,6 @@ export class AppComponent implements OnInit {
   tournamentRef: AngularFirestoreDocument<Tournament>;
   email: string;
   password: string;
-  newTeamName: string;
-  matchesToPlay$: Observable<Match[]>;
   matchesToPlayFilter$ = new BehaviorSubject<string>(undefined);
   numberOfRounds$ = new BehaviorSubject<number>(1);
   matchesToPlayFiltered$: Observable<Match[]>;
@@ -93,7 +91,7 @@ export class AppComponent implements OnInit {
 
           let matchesRaw$ = this.tournamentRef.collection<MatchInFireStore>('matches').snapshotChanges();
 
-          this.matchesToPlay$ = matchesRaw$.pipe(
+          const matchesToPlay$ = matchesRaw$.pipe(
             combineLatest(teams$, this.numberOfRounds$),
             map(([matches, teams, numberOfRounds]) => {
               let teamScores = teams.map(t => {
@@ -143,7 +141,7 @@ export class AppComponent implements OnInit {
             )
           );
 
-          this.matchesToPlayFiltered$ = this.matchesToPlay$
+          this.matchesToPlayFiltered$ = matchesToPlay$
             .pipe(
               combineLatest(this.matchesToPlayFilter$),
               map(([matches, filter]) => matches
@@ -152,10 +150,10 @@ export class AppComponent implements OnInit {
             )
 
 
-          this.pointSummary$ = this.matchesToPlay$.pipe(
+          this.pointSummary$ = matchesToPlay$.pipe(
             combineLatest(teams$),
             map(([matches, teams]) => {
-              let matchesObject = matches
+              let teamScoresByTeamId = matches
                 .filter(m => !!m.matchId)
                 .reduce((acc, match: Match) => {
                   let team1: TeamScore = acc[match.team1Id] || {
@@ -184,14 +182,14 @@ export class AppComponent implements OnInit {
                     ballDifference: 0
                   };
 
-                  acc[match.team1Id] = this.getSomething(team1, match.team1Score, match.team2Score, match.matchId);
-                  acc[match.team2Id] = this.getSomething(team2, match.team2Score, match.team1Score, match.matchId);
+                  acc[match.team1Id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, match.matchId);
+                  acc[match.team2Id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, match.matchId);
 
                   return acc;
                 }, {});
 
               teams.forEach(t => {
-                matchesObject[t.payload.doc.id] = matchesObject[t.payload.doc.id] || <TeamScore>{
+                teamScoresByTeamId[t.payload.doc.id] = teamScoresByTeamId[t.payload.doc.id] || <TeamScore>{
                   name: t.payload.doc.data().name,
                   score: 0,
                   playedMatches: [],
@@ -205,7 +203,7 @@ export class AppComponent implements OnInit {
                 };
               })
 
-              return Object.keys(matchesObject).map(key => matchesObject[key])
+              return Object.keys(teamScoresByTeamId).map(key => teamScoresByTeamId[key])
                 .sort((a, b) => {
                   const scoreDiff = b.score - a.score;
                   if (scoreDiff !== 0) {
@@ -237,7 +235,7 @@ export class AppComponent implements OnInit {
     return myScore - otherTeamsScore;
   }
 
-  private getSomething(myTeam: TeamScore, myTeamScore: number, otherTeamsScore: number, matchId: string): TeamScore {
+  private getNewTeamScoreFromMatch(myTeam: TeamScore, myTeamScore: number, otherTeamsScore: number, matchId: string): TeamScore {
     const gameStats = new GameStats(myTeamScore, otherTeamsScore);
 
     let newTeamScore: TeamScore = {
@@ -276,47 +274,35 @@ export class AppComponent implements OnInit {
 
   removeMatch(matchId: string) {
     this.tournamentRef.collection("matches").doc(matchId).delete();
-        this.snackBar.open("Matchen är borttagen!", null, {
-          duration: 2000,
-        });
+    this.snackBar.open("Matchen är borttagen!", null, {
+      duration: 2000,
+    });
   }
 
   removeTeam(teamScore: TeamScore) {
-    const data = (<ConfirmDialogData>{
-      title: `Vill du ta bort ${teamScore.name}?`
-    });
-    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+    let batch = this.db.firestore.batch();
+    batch.delete(this.tournamentRef.collection("teams").doc(teamScore.teamId).ref);
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        let batch = this.db.firestore.batch();
-        batch.delete(this.tournamentRef.collection("teams").doc(teamScore.teamId).ref);
+    teamScore.playedMatches.forEach(matchId => {
+      batch.delete(this.tournamentRef.collection("matches").doc(matchId).ref);
+    })
 
-        teamScore.playedMatches.forEach(matchId => {
-          batch.delete(this.tournamentRef.collection("matches").doc(matchId).ref);
-        })
+    batch.commit();
 
-        batch.commit();
-
-        this.snackBar.open("Laget är borttaget!", null, {
-          duration: 2000,
-        });
-      }
+    this.snackBar.open("Laget är borttaget!", null, {
+      duration: 2000,
     });
   }
 
   changeNumberOfRounds(numberOfRounds: number) {
-    if (numberOfRounds > 0 && numberOfRounds < 6) {
-      this.tournamentRef.update({ numberOfRounds });
-      this.snackBar.open("Antal interna möten är uppdaterat är uppdaterat!", null, {
-        duration: 2000,
-      });
-    }
+    this.tournamentRef.update({ numberOfRounds });
+    this.snackBar.open("Antal interna möten är uppdaterat är uppdaterat!", null, {
+      duration: 2000,
+    });
   }
 
-  addTeam() {
-    this.tournamentRef.collection<Team>("teams").add({ name: this.newTeamName });
-    this.newTeamName = undefined;
+  onTeamAdded(teamName: string) {
+    this.tournamentRef.collection<Team>("teams").add({ name: teamName });
     this.snackBar.open("Laget är tillagt!", null, {
       duration: 2000,
     });
@@ -364,20 +350,11 @@ export class AppComponent implements OnInit {
     });
   }
 
-  startUpdateTeam(team: TeamScore) {
-    const data: EditTeamDialogData = {
-      name: team.name
-    }
-    this.dialog.open(EditTeamDialogComponent, {width: "600px", data})
-      .afterClosed()
-      .subscribe((result: EditTeamDialogData) => {
-        if (!!result) {
-          this.tournamentRef.collection<Team>("teams").doc(team.teamId).update({ name: result.name });
-          this.snackBar.open("Laget är uppdaterat!", null, {
-            duration: 2000,
-          });
-        }
-      });
+  onTeamEdited(team: EditTeamDialogData) {
+    this.tournamentRef.collection<Team>("teams").doc(team.id).update({ name: team.name });
+    this.snackBar.open("Laget är uppdaterat!", null, {
+      duration: 2000,
+    });
   }
 
   login() {
@@ -471,12 +448,10 @@ export class AppComponent implements OnInit {
     })
   }
 
-  changeNameOfTurnament(name: string) {
-    if (!!name) {
-      this.tournamentRef.ref.update({ name: name });
-      this.snackBar.open("Namnet är ändrat!", null, {
-        duration: 2000,
-      });
-    }
+  changeNameOfTournament(name: string) {
+    this.tournamentRef.ref.update({ name: name });
+    this.snackBar.open("Namnet är ändrat!", null, {
+      duration: 2000,
+    });
   }
 }

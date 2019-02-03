@@ -2,23 +2,17 @@
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <span>PingisAppen</span>
-
       <button mat-button [matMenuTriggerFor]="tournamentMenu">Turneringar</button>
       <span class="example-spacer"></span>
-      <!-- <mat-icon class="example-icon">favorite</mat-icon>
-      <mat-icon class="example-icon" (click)="logout()">toggle_off</mat-icon> -->
-
       <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
       </button>
     </mat-toolbar-row>
   </mat-toolbar>
 
-
   <mat-menu #tournamentMenu="matMenu">
     <button *ngFor="let t of tournaments$ | async" (click)="selectedTournamentId$.next(t.id)" mat-menu-item>{{t.name}}</button>
   </mat-menu>
-
 
   <mat-menu #menu="matMenu">
     <button mat-menu-item (click)="addTournamentFromModal()">
@@ -52,68 +46,10 @@
           </app-game-list>
         </mat-tab>
         <mat-tab label="Inställningar">
-          <mat-card>
-            <mat-accordion>
-              <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    Lag
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    Hantera lagen i turneringen
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                <table class="example-full-width">
-                  <thead>
-                    <tr>
-                      <th>
-                        Lag
-                      </th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let team of pointSummary$ | async">
-                      <td>{{team.name}}</td>
-                      <td>
-                        <button mat-icon-button type="button" (click)="startUpdateTeam(team)">
-                          <mat-icon class="example-icon">edit</mat-icon>
-                        </button>
-                        <button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
-                          <mat-icon class="example-icon">delete</mat-icon>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <br>
-                <mat-form-field class="example-full-width">
-                  <input matInput placeholder="Lagnamn på nytt lag" type="text" [(ngModel)]="newTeamName" name="newTeamName" />
-                </mat-form-field>
-                <button mat-raised-button color="primary" type="button" [disabled]="!newTeamName" (click)="addTeam()">
-                  <mat-icon>add</mat-icon>
-                  Lägg till lag
-                </button>
-              </mat-expansion-panel>
-              <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    Övriga inställningar
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <form class="example-form">
-                  <mat-form-field class="example-full-width">
-                    <input matInput type="text" placeholder="Namn" [(ngModel)]="tournament.name" (ngModelChange)="changeNameOfTurnament(tournament.name)"
-                      name="tournamentName" />
-                  </mat-form-field>
-                  <mat-form-field class="example-full-width">
-                    <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
-                      [ngModel]="numberOfRounds$ | async" (ngModelChange)="changeNumberOfRounds($event)" />
-                  </mat-form-field>
-                </form>
-              </mat-expansion-panel>
-            </mat-accordion>
-          </mat-card>
+          <app-tournament-settings [teams]="pointSummary$ | async" [tournamentName]="tournament.name" [numberOfRounds]="tournament.numberOfRounds"
+            (teamEdited)="onTeamEdited($event)" (teamRemoved)="removeTeam($event)" (teamAdded)="onTeamAdded($event)"
+            (tournamentNameChanged)="changeNameOfTournament($event)" (numberOfRoundsChanged)="changeNumberOfRounds($event)">
+          </app-tournament-settings>
         </mat-tab>
       </mat-tab-group>
     </div>

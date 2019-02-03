@@ -1,0 +1,62 @@
+<mat-card>
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Lag
+        </mat-panel-title>
+        <mat-panel-description>
+          Hantera lagen i turneringen
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <table class="example-full-width">
+        <thead>
+          <tr>
+            <th>
+              Lag
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let team of teams">
+            <td>{{team.name}}</td>
+            <td>
+              <button mat-icon-button type="button" (click)="startUpdateTeam(team)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" type="button" (click)="removeTeam(team)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <mat-form-field class="example-full-width">
+        <input matInput placeholder="Lagnamn på nytt lag" type="text" [(ngModel)]="newTeamName" name="newTeamName" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="button" [disabled]="!newTeamName" (click)="addTeam()">
+        <mat-icon>add</mat-icon>
+        Lägg till lag
+      </button>
+    </mat-expansion-panel>
+    <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Övriga inställningar
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <form class="example-form">
+        <mat-form-field class="example-full-width">
+          <input matInput type="text" placeholder="Namn" [(ngModel)]="tournamentName" (ngModelChange)="onTournamentNameChanged($event)"
+            name="tournamentName" />
+        </mat-form-field>
+        <mat-form-field class="example-full-width">
+          <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
+            [ngModel]="numberOfRounds" (ngModelChange)="onNumberOfRoundsChanged($event)" />
+        </mat-form-field>
+      </form>
+    </mat-expansion-panel>
+  </mat-accordion>
+</mat-card>

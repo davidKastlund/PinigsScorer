@@ -18,7 +18,8 @@ export class EditTeamDialogComponent implements OnInit {
 
   onSave() {
     const editedTeam: EditTeamDialogData = {
-      name: this.data.name
+      name: this.data.name,
+      id: this.data.id
     }
 
     this.dialogRef.close(editedTeam);

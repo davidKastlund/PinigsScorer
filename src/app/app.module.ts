@@ -17,6 +17,7 @@ import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.com
 import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sheet/score-table-info-bottom-sheet.component';
 import { ScoreTableComponent } from './score-table/score-table.component';
 import { GameListComponent } from './game-list/game-list.component';
+import { TournamentSettingsComponent } from './tournament-settings/tournament-settings.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { GameListComponent } from './game-list/game-list.component';
     EditTeamDialogComponent,
     ScoreTableInfoBottomSheetComponent,
     ScoreTableComponent,
-    GameListComponent
+    GameListComponent,
+    TournamentSettingsComponent
   ],
   imports: [
     BrowserModule,
