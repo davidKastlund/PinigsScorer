@@ -6,7 +6,7 @@ import { map, combineLatest, tap, take } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { MatSnackBar, MatDialog } from '@angular/material';
+import { MatSnackBar, MatDialog, MatBottomSheet } from '@angular/material';
 import { Tournament } from "./Tournament";
 import { TournamentWithId } from './TournamentWithId';
 import { Team } from './Team';
@@ -23,6 +23,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
 import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
 import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
+import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sheet/score-table-info-bottom-sheet.component';
 
 @Component({
   selector: 'app-root',
@@ -50,7 +51,8 @@ export class AppComponent implements OnInit {
   constructor(private db: AngularFirestore,
     public afAuth: AngularFireAuth,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog) {
+    private dialog: MatDialog,
+    private bottomSheet: MatBottomSheet) {
 
     let tournamentsRef = db.collection<Tournament>("tournaments");
 
@@ -399,6 +401,10 @@ export class AppComponent implements OnInit {
           });
         }
       });
+  }
+
+  openScoreTableInfo() {
+    this.bottomSheet.open(ScoreTableInfoBottomSheetComponent);
   }
 
   login() {

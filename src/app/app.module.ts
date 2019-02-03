@@ -14,6 +14,7 @@ import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-n
 import { AddNewGameComponent } from './add-new-game/add-new-game.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
+import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sheet/score-table-info-bottom-sheet.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.com
     CreateNewTournamtentComponent,
     AddNewGameComponent,
     ConfirmDialogComponent,
-    EditTeamDialogComponent
+    EditTeamDialogComponent,
+    ScoreTableInfoBottomSheetComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +40,8 @@ import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.com
     CreateNewTournamtentComponent,
     AddNewGameComponent,
     ConfirmDialogComponent,
-    EditTeamDialogComponent
+    EditTeamDialogComponent,
+    ScoreTableInfoBottomSheetComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

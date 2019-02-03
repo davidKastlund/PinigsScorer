@@ -4,10 +4,13 @@ MatCardModule,
 MatMenuModule,
 MatTabsModule,
 MatExpansionModule, 
-MatDialogModule} from '@angular/material';
+MatDialogModule,
+MatBottomSheetModule} from '@angular/material';
 
 const materialModules = [MatButtonModule, MatCheckboxModule, MatToolbarModule, MatSelectModule, MatInputModule, MatSnackBarModule, MatIconModule, MatCardModule, MatMenuModule, MatTabsModule, MatExpansionModule,
-MatDialogModule];
+MatDialogModule,
+MatBottomSheetModule];
+
 @NgModule({
   imports: materialModules,
   exports: materialModules,
