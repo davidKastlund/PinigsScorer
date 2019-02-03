@@ -16,6 +16,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
 import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sheet/score-table-info-bottom-sheet.component';
 import { ScoreTableComponent } from './score-table/score-table.component';
+import { GameListComponent } from './game-list/game-list.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import { ScoreTableComponent } from './score-table/score-table.component';
     ConfirmDialogComponent,
     EditTeamDialogComponent,
     ScoreTableInfoBottomSheetComponent,
-    ScoreTableComponent
+    ScoreTableComponent,
+    GameListComponent
   ],
   imports: [
     BrowserModule,

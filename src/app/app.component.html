@@ -47,52 +47,9 @@
           </app-score-table>
         </mat-tab>
         <mat-tab label="Matcher">
-          <mat-card>
-            <mat-card-content>
-              <mat-form-field class="example-full-width">
-                <input matInput type="text" placeholder="Sök" [(ngModel)]="searchText" (ngModelChange)="matchesToPlayFilter$.next($event)" />
-              </mat-form-field>
-              <table>
-                <thead>
-                  <tr>
-                    <th>
-
-                    </th>
-                    <th>
-                      Lag 1
-                    </th>
-                    <th>poäng</th>
-                    <th>Lag 2</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let match of matchesToPlayFiltered$ | async; let ind = index">
-                    <td>{{ind + 1}}</td>
-                    <td>{{match.team1.name}}</td>
-                    <td>
-                      <div *ngIf="!!match.matchId">
-                        {{match.team1Score}}
-                        -
-                        {{match.team2Score}}
-                      </div>
-                    </td>
-                    <td>{{match.team2.name}}</td>
-                    <td>
-                      <button mat-icon-button color="warn" *ngIf="!!match.matchId" type="button" (click)="removeMatch(match.matchId)">
-                        <mat-icon class="example-icon">delete</mat-icon>
-                      </button>
-                      <button mat-icon-button color="primary" *ngIf="!match.matchId" type="button" (click)="addMatchFromDialog(match)">
-                        <mat-icon class="example-icon">add_circle</mat-icon>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-            </mat-card-content>
-
-          </mat-card>
+          <app-game-list [matchesToPlay]="matchesToPlayFiltered$ | async" (filterChanged)="matchesToPlayFilter$.next($event)"
+            (matchRemoved)="removeMatch($event)" (matchAdded)="addMatch($event)">
+          </app-game-list>
         </mat-tab>
         <mat-tab label="Inställningar">
           <mat-card>

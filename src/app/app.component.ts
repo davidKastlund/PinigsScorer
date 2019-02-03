@@ -5,8 +5,8 @@ import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firest
 import { map, combineLatest, tap, take } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { MatSnackBar, MatDialog, MatBottomSheet } from '@angular/material';
+import { BehaviorSubject } from 'rxjs';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { Tournament } from "./Tournament";
 import { TournamentWithId } from './TournamentWithId';
 import { Team } from './Team';
@@ -16,14 +16,11 @@ import { TeamScore } from './TeamScore';
 import { GlobalSettings } from './GlobalSettings';
 import { GameStats } from './GameStats';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
-import { AddNewGameComponent } from './add-new-game/add-new-game.component';
-import { AddNewGameDialogResult } from "./add-new-game/AddNewGameDialogResult";
-import { AddNewGameDialogData } from "./add-new-game/AddNewGameDialogData";
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
 import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
 import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
-import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sheet/score-table-info-bottom-sheet.component';
+import { AddedMatchDto } from './game-list/AddedMatchDto';
 
 @Component({
   selector: 'app-root',
@@ -262,46 +259,26 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  addMatchFromDialog(match: Match) {
-    const dialogData: AddNewGameDialogData = {
-      team1Name: match.team1.name,
-      team2Name: match.team2.name,
+  addMatch(addedMatch: AddedMatchDto) {
+    const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
+    let newMatch: MatchInFireStore = {
+      date: timestamp,
+      team1: this.tournamentRef.collection("teams").doc(addedMatch.team1Id).ref,
+      team2: this.tournamentRef.collection("teams").doc(addedMatch.team2Id).ref,
+      team1Score: addedMatch.team1Score,
+      team2Score: addedMatch.team2Score
     }
-    let dialogRef = this.dialog.open(AddNewGameComponent, { width: "600px", data: dialogData });
-
-    dialogRef.afterClosed().subscribe((result: AddNewGameDialogResult) => {
-      if (!!result) {
-        const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
-        let newMatch: MatchInFireStore = {
-          date: timestamp,
-          team1: this.tournamentRef.collection("teams").doc(match.team1Id).ref,
-          team2: this.tournamentRef.collection("teams").doc(match.team2Id).ref,
-          team1Score: result.team1Score,
-          team2Score: result.team2Score
-        }
-        this.tournamentRef.collection("matches").add(newMatch);
-        this.snackBar.open("Matchen är tillagd!", null, {
-          duration: 2000,
-        });
-      }
-    })
+    this.tournamentRef.collection("matches").add(newMatch);
+    this.snackBar.open("Matchen är tillagd!", null, {
+      duration: 2000,
+    });
   }
 
   removeMatch(matchId: string) {
-    const data = (<ConfirmDialogData>{
-      title: "Vill du ta bort matchen?",
-      okButtonText: "Ja ta bort matchen",
-    });
-    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.tournamentRef.collection("matches").doc(matchId).delete();
+    this.tournamentRef.collection("matches").doc(matchId).delete();
         this.snackBar.open("Matchen är borttagen!", null, {
           duration: 2000,
         });
-      }
-    });
   }
 
   removeTeam(teamScore: TeamScore) {
@@ -474,7 +451,7 @@ export class AppComponent implements OnInit {
     }
 
     const newLocal = Array.from({ length: numberOfRounds }, (v, k) => k + 1);;
-    matchesEvenlyDiststributed = newLocal.reduce((acc, x) => {
+    matchesEvenlyDiststributed = newLocal.reduce((acc) => {
       return acc.concat(matchesEvenlyDiststributed);
     }, []);
 
