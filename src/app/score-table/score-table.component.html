@@ -1,0 +1,31 @@
+<button mat-icon-button (click)="openScoreTableInfo()">
+  <mat-icon>help</mat-icon>
+</button>
+<table class="example-full-width">
+  <thead>
+    <tr>
+      <th>
+        Lag
+      </th>
+      <th>M</th>
+      <th>V</th>
+      <th>O(V)</th>
+      <th>O(F)</th>
+      <th>F</th>
+      <th>+/-</th>
+      <th>PO</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let team of teams">
+      <td>{{team.name}}</td>
+      <td>{{team.playedMatchesCount}}</td>
+      <td>{{team.gameWinCount}}</td>
+      <td>{{team.gameWinOvertimeCount}}</td>
+      <td>{{team.gameLoseOvertimeCount}}</td>
+      <td>{{team.gameLoseCount}}</td>
+      <td>{{team.ballDifference >= 0 ? '+' : '' }}{{team.ballDifference}}</td>
+      <td><b>{{team.score}}</b></td>
+    </tr>
+  </tbody>
+</table>

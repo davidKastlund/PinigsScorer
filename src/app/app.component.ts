@@ -51,8 +51,7 @@ export class AppComponent implements OnInit {
   constructor(private db: AngularFirestore,
     public afAuth: AngularFireAuth,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private bottomSheet: MatBottomSheet) {
+    private dialog: MatDialog) {
 
     let tournamentsRef = db.collection<Tournament>("tournaments");
 
@@ -402,10 +401,6 @@ export class AppComponent implements OnInit {
           });
         }
       });
-  }
-
-  openScoreTableInfo() {
-    this.bottomSheet.open(ScoreTableInfoBottomSheetComponent);
   }
 
   login() {

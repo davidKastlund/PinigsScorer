@@ -43,38 +43,8 @@
       <h3 style="padding-left: 16px">{{tournament.name}}</h3>
       <mat-tab-group>
         <mat-tab label="Tabell">
-          <br>
-          <button mat-icon-button (click)="openScoreTableInfo()">
-            <mat-icon>help</mat-icon>
-          </button>
-          <table class="example-full-width">
-            <thead>
-              <tr>
-                <th>
-                  Lag
-                </th>
-                <th>M</th>
-                <th>V</th>
-                <th>O(V)</th>
-                <th>O(F)</th>
-                <th>F</th>
-                <th>+/-</th>
-                <th>PO</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let team of pointSummary$ | async">
-                <td>{{team.name}}</td>
-                <td>{{team.playedMatchesCount}}</td>
-                <td>{{team.gameWinCount}}</td>
-                <td>{{team.gameWinOvertimeCount}}</td>
-                <td>{{team.gameLoseOvertimeCount}}</td>
-                <td>{{team.gameLoseCount}}</td>
-                <td>{{team.ballDifference >= 0 ? '+' : '' }}{{team.ballDifference}}</td>
-                <td><b>{{team.score}}</b></td>
-              </tr>
-            </tbody>
-          </table>
+          <app-score-table [teams]="pointSummary$ | async">
+          </app-score-table>
         </mat-tab>
         <mat-tab label="Matcher">
           <mat-card>
