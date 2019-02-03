@@ -18,7 +18,6 @@ import { GameStats } from './GameStats';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
-import { EditTeamDialogComponent } from './edit-team-dialog/edit-team-dialog.component';
 import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
 import { AddedMatchDto } from './game-list/AddedMatchDto';
 
