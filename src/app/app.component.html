@@ -33,26 +33,7 @@
     </button>
   </mat-menu>
   <div *ngIf="tournament$ | async as tournament">
-    <div>
-      <h3 style="padding-left: 16px">{{tournament.name}}</h3>
-      <mat-tab-group>
-        <mat-tab label="Tabell">
-          <app-score-table [teams]="pointSummary$ | async">
-          </app-score-table>
-        </mat-tab>
-        <mat-tab label="Matcher">
-          <app-game-list [matchesToPlay]="matchesToPlayFiltered$ | async" (filterChanged)="matchesToPlayFilter$.next($event)"
-            (matchRemoved)="removeMatch($event)" (matchAdded)="addMatch($event)">
-          </app-game-list>
-        </mat-tab>
-        <mat-tab label="Inställningar">
-          <app-tournament-settings [teams]="pointSummary$ | async" [tournamentName]="tournament.name" [numberOfRounds]="tournament.numberOfRounds"
-            (teamEdited)="onTeamEdited($event)" (teamRemoved)="removeTeam($event)" (teamAdded)="onTeamAdded($event)"
-            (tournamentNameChanged)="changeNameOfTournament($event)" (numberOfRoundsChanged)="changeNumberOfRounds($event)">
-          </app-tournament-settings>
-        </mat-tab>
-      </mat-tab-group>
-    </div>
+    <app-tournament-detail [tournament]="tournament"></app-tournament-detail>
   </div>
 </div>
 <ng-template #showLogin>

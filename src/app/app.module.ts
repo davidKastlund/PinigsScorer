@@ -18,6 +18,7 @@ import { ScoreTableInfoBottomSheetComponent } from './score-table-info-bottom-sh
 import { ScoreTableComponent } from './score-table/score-table.component';
 import { GameListComponent } from './game-list/game-list.component';
 import { TournamentSettingsComponent } from './tournament-settings/tournament-settings.component';
+import { TournamentDetailComponent } from './tournament-detail/tournament-detail.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { TournamentSettingsComponent } from './tournament-settings/tournament-se
     ScoreTableInfoBottomSheetComponent,
     ScoreTableComponent,
     GameListComponent,
-    TournamentSettingsComponent
+    TournamentSettingsComponent,
+    TournamentDetailComponent
   ],
   imports: [
     BrowserModule,
