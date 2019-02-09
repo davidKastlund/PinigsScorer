@@ -199,21 +199,19 @@ export class TournamentDataService {
   }
 
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {
+    const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    let teams$ = tournamentDoc.collection<Team>("teams").snapshotChanges();
+    let matches$ = tournamentDoc.collection<MatchInFireStore>("matches").snapshotChanges();
 
-    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    let teams$ = tournament.collection<Team>("teams").snapshotChanges();
-
-
-    const matchesToPlay$ = this.getMatchesToPlayForTournament(tournament, teams$);
-    const teamScores = matchesToPlay$.pipe(
+    const teamScores = matches$.pipe(
       combineLatest(teams$),
-      map(([matches, teams]) => {
-        let teamScoresByTeamId = matches
-          .filter(m => !!m.matchId)
-          .reduce((acc, match: Match) => {
-            let team1: TeamScore = acc[match.team1Id] || {
-              name: match.team1.name,
-              teamId: match.team1Id,
+      map(([matchActions, teamActions]) => {
+        let teamScoresByTeamId = matchActions
+          .reduce((acc, matchAction) => {
+            let match = matchAction.payload.doc.data()
+            let team1: TeamScore = acc[match.team1.id] || {
+              name: teamActions.find(t => t.payload.doc.id === match.team1.id).payload.doc.data().name,
+              teamId: match.team1.id,
               score: 0,
               playedMatchesCount: 0,
               playedMatches: [],
@@ -224,9 +222,9 @@ export class TournamentDataService {
               ballDifference: 0
             };
 
-            let team2: TeamScore = acc[match.team2Id] || {
-              name: match.team2.name,
-              teamId: match.team2Id,
+            let team2: TeamScore = acc[match.team2.id] || {
+              name: teamActions.find(t => t.payload.doc.id === match.team2.id).payload.doc.data().name,
+              teamId: match.team2.id,
               score: 0,
               playedMatchesCount: 0,
               gameWinCount: 0,
@@ -237,13 +235,13 @@ export class TournamentDataService {
               ballDifference: 0
             };
 
-            acc[match.team1Id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, match.matchId);
-            acc[match.team2Id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, match.matchId);
+            acc[match.team1.id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, matchAction.payload.doc.id);
+            acc[match.team2.id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, matchAction.payload.doc.id);
 
             return acc;
           }, {});
 
-        teams.forEach(t => {
+        teamActions.forEach(t => {
           teamScoresByTeamId[t.payload.doc.id] = teamScoresByTeamId[t.payload.doc.id] || <TeamScore>{
             name: t.payload.doc.data().name,
             score: 0,
