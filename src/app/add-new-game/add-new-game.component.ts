@@ -22,7 +22,7 @@ export class AddNewGameComponent implements OnInit {
     const result: AddNewGameDialogResult = {
       team1Score: this.team1Score,
       team2Score: this.team2Score
-    }
+    };
     this.dialogRef.close(result);
   }
 

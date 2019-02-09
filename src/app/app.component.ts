@@ -7,7 +7,7 @@ import * as firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { BehaviorSubject } from 'rxjs';
 import { MatSnackBar, MatDialog } from '@angular/material';
-import { Tournament } from "./Tournament";
+import { Tournament } from './Tournament';
 import { TournamentWithId } from './TournamentWithId';
 import { GlobalSettings } from './GlobalSettings';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
   email: string;
   password: string;
   tournaments$: Observable<TournamentWithId[]>;
-  selectedTournamentId$ = new BehaviorSubject<string>("gazBtm1efiIZ91nL5ffk");
+  selectedTournamentId$ = new BehaviorSubject<string>('gazBtm1efiIZ91nL5ffk');
   globalSettingsRef: firebase.firestore.DocumentReference;
 
   constructor(private db: AngularFirestore,
@@ -35,9 +35,9 @@ export class AppComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog) {
 
-    let tournamentsRef = db.collection<Tournament>("tournaments");
+    const tournamentsRef = db.collection<Tournament>('tournaments');
 
-    const globalSettings = db.collection<GlobalSettings>("settings").doc("globalSettings");
+    const globalSettings = db.collection<GlobalSettings>('settings').doc('globalSettings');
     this.globalSettingsRef = globalSettings.ref;
 
     globalSettings.valueChanges()
@@ -66,7 +66,7 @@ export class AppComponent implements OnInit {
                 id: action.payload.id,
                 name: action.payload.data().name,
                 numberOfRounds: action.payload.data().numberOfRounds,
-              }
+              };
             })
           );
         }
@@ -84,10 +84,10 @@ export class AppComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(newTournamteName => {
       if (!!newTournamteName) {
-        this.db.collection<Tournament>("tournaments").add({ name: newTournamteName, numberOfRounds: 1 })
+        this.db.collection<Tournament>('tournaments').add({ name: newTournamteName, numberOfRounds: 1 })
           .then(ref => {
             this.selectedTournamentId$.next(ref.id);
-            this.snackBar.open("Turneringen är tillagt!", null, {
+            this.snackBar.open('Turneringen är tillagt!', null, {
               duration: 2000,
             });
           });
@@ -97,15 +97,15 @@ export class AppComponent implements OnInit {
 
   removeTournament(tournament: TournamentWithId) {
     const data = (<ConfirmDialogData>{
-      title: "Vill du ta bort turneringen?"
+      title: 'Vill du ta bort turneringen?'
     });
-    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { width: '600px', data });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.selectedTournamentId$.next(undefined);
-        this.db.collection<Tournament>("tournaments").doc(tournament.id).delete();
-        this.snackBar.open("Turneringen är borttagen!", null, {
+        this.db.collection<Tournament>('tournaments').doc(tournament.id).delete();
+        this.snackBar.open('Turneringen är borttagen!', null, {
           duration: 2000,
         });
       }
@@ -114,7 +114,7 @@ export class AppComponent implements OnInit {
 
   makeTournamentDefault(tournament: TournamentWithId) {
     this.globalSettingsRef.update(<GlobalSettings>{ defaultTournamentId: tournament.id });
-    this.snackBar.open("Inställningen är sparad!", null, {
+    this.snackBar.open('Inställningen är sparad!', null, {
       duration: 2000,
     });
   }

@@ -36,8 +36,8 @@ export class TournamentSettingsComponent implements OnInit {
     const data: EditTeamDialogData = {
       name: team.name,
       id: team.teamId
-    }
-    this.dialog.open(EditTeamDialogComponent, { width: "600px", data })
+    };
+    this.dialog.open(EditTeamDialogComponent, { width: '600px', data })
       .afterClosed()
       .subscribe((result: EditTeamDialogData) => {
         if (!!result) {
@@ -50,7 +50,7 @@ export class TournamentSettingsComponent implements OnInit {
     const data = (<ConfirmDialogData>{
       title: `Vill du ta bort ${teamScore.name}?`
     });
-    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { width: '600px', data });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -64,7 +64,7 @@ export class TournamentSettingsComponent implements OnInit {
       this.teamAdded.emit(this.newTeamName);
       this.newTeamName = undefined;
     } else {
-      this.snackBar.open("Laget måste ha ett namn!", null, {
+      this.snackBar.open('Laget måste ha ett namn!', null, {
         duration: 2000,
       });
     }

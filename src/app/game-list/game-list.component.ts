@@ -34,10 +34,10 @@ export class GameListComponent implements OnInit {
 
   removeMatch(matchId: string) {
     const data = (<ConfirmDialogData>{
-      title: "Vill du ta bort matchen?",
-      okButtonText: "Ja ta bort matchen",
+      title: 'Vill du ta bort matchen?',
+      okButtonText: 'Ja ta bort matchen',
     });
-    let dialogRef = this.dialog.open(ConfirmDialogComponent, { width: "600px", data });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, { width: '600px', data });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -50,21 +50,21 @@ export class GameListComponent implements OnInit {
     const dialogData: AddNewGameDialogData = {
       team1Name: match.team1.name,
       team2Name: match.team2.name,
-    }
-    let dialogRef = this.dialog.open(AddNewGameComponent, { width: "600px", data: dialogData });
+    };
+    const dialogRef = this.dialog.open(AddNewGameComponent, { width: '600px', data: dialogData });
 
     dialogRef.afterClosed().subscribe((result: AddNewGameDialogResult) => {
       if (!!result) {
-        let newMatch: AddedMatchDto = {
+        const newMatch: AddedMatchDto = {
           team1Id: match.team1Id,
           team2Id: match.team2Id,
           team1Score: result.team1Score,
           team2Score: result.team2Score
-        }
+        };
 
         this.matchAdded.emit(newMatch);
       }
-    })
+    });
   }
 
 }

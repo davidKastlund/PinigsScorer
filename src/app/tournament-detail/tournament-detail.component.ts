@@ -1,12 +1,12 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TournamentWithId } from '../TournamentWithId';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { TeamScore } from '../TeamScore';
 import { TournamentDataService } from '../tournament-data.service';
 import { Match } from '../Match';
 import { AddedMatchDto } from '../game-list/AddedMatchDto';
 import { EditTeamDialogData } from '../edit-team-dialog/EditTeamDialogData';
-import { combineLatest, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -30,19 +30,18 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
       const tournamentId = changes.tournament.currentValue.id;
       this.pointSummary$ = this.tournamentData.getTeamScores(tournamentId);
       const matchesToPlay$ = this.tournamentData.getMatchesToPlayByTournamentId(tournamentId);
-      this.matchesToPlayFiltered$ = matchesToPlay$
+      this.matchesToPlayFiltered$ = combineLatest(matchesToPlay$, this.matchesToPlayFilter$)
       .pipe(
-        combineLatest(this.matchesToPlayFilter$),
         map(([matches, filter]) => matches
-          .filter(m => !filter || 
-            this.stringContains(m.team1.name, filter) || 
+          .filter(m => !filter ||
+            this.stringContains(m.team1.name, filter) ||
             this.stringContains(m.team2.name, filter))
         )
       );
     }
   }
 
-  private stringContains(str: string, compareStr: string) : boolean {
+  private stringContains(str: string, compareStr: string): boolean {
     return str && str.toLocaleLowerCase().includes(compareStr);
   }
 
@@ -75,7 +74,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
   }
 
   changeNumberOfRounds(numberOfRounds: number) {
-    this.tournamentData.changeNumberOfRounds(numberOfRounds, this.tournament.id)
+    this.tournamentData.changeNumberOfRounds(numberOfRounds, this.tournament.id);
   }
 
 }

@@ -8,9 +8,9 @@ import { MatchInFireStore } from './MatchInFireStore';
 import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
 import { Team } from './Team';
 import { TeamScore } from './TeamScore';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { Match } from './Match';
-import { map, combineLatest } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { GameStats } from './GameStats';
 
 @Injectable({
@@ -23,8 +23,8 @@ export class TournamentDataService {
 
   removeMatch(matchId: string, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    tournament.collection("matches").doc(matchId).delete();
-    this.snackBar.open("Matchen är borttagen!", null, {
+    tournament.collection('matches').doc(matchId).delete();
+    this.snackBar.open('Matchen är borttagen!', null, {
       duration: 2000,
     });
   }
@@ -33,15 +33,15 @@ export class TournamentDataService {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
     const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
-    let newMatch: MatchInFireStore = {
+    const newMatch: MatchInFireStore = {
       date: timestamp,
-      team1: tournament.collection("teams").doc(addedMatch.team1Id).ref,
-      team2: tournament.collection("teams").doc(addedMatch.team2Id).ref,
+      team1: tournament.collection('teams').doc(addedMatch.team1Id).ref,
+      team2: tournament.collection('teams').doc(addedMatch.team2Id).ref,
       team1Score: addedMatch.team1Score,
       team2Score: addedMatch.team2Score
-    }
-    tournament.collection("matches").add(newMatch);
-    this.snackBar.open("Matchen är tillagd!", null, {
+    };
+    tournament.collection('matches').add(newMatch);
+    this.snackBar.open('Matchen är tillagd!', null, {
       duration: 2000,
     });
   }
@@ -51,8 +51,8 @@ export class TournamentDataService {
   addTeam(teamName: string, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
-    tournament.collection<Team>("teams").add({ name: teamName });
-    this.snackBar.open("Laget är tillagt!", null, {
+    tournament.collection<Team>('teams').add({ name: teamName });
+    this.snackBar.open('Laget är tillagt!', null, {
       duration: 2000,
     });
   }
@@ -60,8 +60,8 @@ export class TournamentDataService {
   editTeam(team: EditTeamDialogData, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
-    tournament.collection<Team>("teams").doc(team.id).update({ name: team.name });
-    this.snackBar.open("Laget är uppdaterat!", null, {
+    tournament.collection<Team>('teams').doc(team.id).update({ name: team.name });
+    this.snackBar.open('Laget är uppdaterat!', null, {
       duration: 2000,
     });
   }
@@ -71,16 +71,16 @@ export class TournamentDataService {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
 
-    let batch = this.db.firestore.batch();
-    batch.delete(tournament.collection("teams").doc(teamScore.teamId).ref);
+    const batch = this.db.firestore.batch();
+    batch.delete(tournament.collection('teams').doc(teamScore.teamId).ref);
 
     teamScore.playedMatches.forEach(matchId => {
-      batch.delete(tournament.collection("matches").doc(matchId).ref);
-    })
+      batch.delete(tournament.collection('matches').doc(matchId).ref);
+    });
 
     batch.commit();
 
-    this.snackBar.open("Laget är borttaget!", null, {
+    this.snackBar.open('Laget är borttaget!', null, {
       duration: 2000,
     });
   }
@@ -89,7 +89,7 @@ export class TournamentDataService {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
     tournament.ref.update({ name: name });
-    this.snackBar.open("Namnet är ändrat!", null, {
+    this.snackBar.open('Namnet är ändrat!', null, {
       duration: 2000,
     });
   }
@@ -97,7 +97,7 @@ export class TournamentDataService {
   changeNumberOfRounds(numberOfRounds: number, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
     tournament.update({ numberOfRounds });
-    this.snackBar.open("Antal interna möten är uppdaterat är uppdaterat!", null, {
+    this.snackBar.open('Antal interna möten är uppdaterat är uppdaterat!', null, {
       duration: 2000,
     });
   }
@@ -105,21 +105,21 @@ export class TournamentDataService {
   private combinationUtil(arr: string[], data: string[],
     start: number, end: number,
     index: number, r: number, resultArr: string[][]) {
-    // Current combination is  
-    // ready to be printed,  
-    // print it 
-    if (index == r) {
+    // Current combination is
+    // ready to be printed,
+    // print it
+    if (index === r) {
       resultArr.push(Object.assign([], data));
       return;
     }
 
-    // replace index with all 
-    // possible elements. The  
-    // condition "end-i+1 >=  
-    // r-index" makes sure that  
-    // including one element 
-    // at index will make a  
-    // combination with remaining  
+    // replace index with all
+    // possible elements. The
+    // condition "end-i+1 >=
+    // r-index" makes sure that
+    // including one element
+    // at index will make a
+    // combination with remaining
     // elements at remaining positions
     for (let i = start; i <= end && end - i + 1 >= r - index; i++) {
       data[index] = arr[i];
@@ -128,8 +128,8 @@ export class TournamentDataService {
   }
 
   private getCombinations(arr: string[], n: number, r: number): string[][] {
-    let data: string[] = new Array<string>(r);
-    let resultArr: string[][] = [];
+    const data: string[] = new Array<string>(r);
+    const resultArr: string[][] = [];
     this.combinationUtil(arr, data, 0, n - 1, 0, r, resultArr);
 
     return resultArr;
@@ -137,23 +137,23 @@ export class TournamentDataService {
 
   private getAllMatchesToPlay(teams: TeamScore[], numberOfRounds: number): Match[] {
     const teamIds = teams.map(t => t.teamId);
-    
-    let r = 2;
-    let n = teamIds.length;
-    let resultArr = this.getCombinations(teamIds, n, r);
+
+    const r = 2;
+    const n = teamIds.length;
+    const resultArr = this.getCombinations(teamIds, n, r);
     let matchesEvenlyDiststributed = [];
 
-    let playedMostByTeamId = teamIds.reduce((acc, t) => {
+    const playedMostByTeamId = teamIds.reduce((acc, t) => {
       acc[t] = 0;
       return acc;
-    }, {})
+    }, {});
 
     for (let i = 0; i < resultArr.length; i++) {
-      let nextMatch = resultArr
+      const nextMatch = resultArr
         .filter(m => !matchesEvenlyDiststributed.some(am => am[0] === m[0] && am[1] === m[1]))
         .sort((a, b) => {
-          let aPlayedWeight = playedMostByTeamId[a[0]] + playedMostByTeamId[a[1]];
-          let bPlayedWeight = playedMostByTeamId[b[0]] + playedMostByTeamId[b[1]];
+          const aPlayedWeight = playedMostByTeamId[a[0]] + playedMostByTeamId[a[1]];
+          const bPlayedWeight = playedMostByTeamId[b[0]] + playedMostByTeamId[b[1]];
           return aPlayedWeight - bPlayedWeight;
         })[0];
 
@@ -163,13 +163,13 @@ export class TournamentDataService {
       matchesEvenlyDiststributed.push(nextMatch);
     }
 
-    const newLocal = Array.from({ length: numberOfRounds }, (v, k) => k + 1);;
+    const newLocal = Array.from({ length: numberOfRounds }, (v, k) => k + 1);
     matchesEvenlyDiststributed = newLocal.reduce((acc) => {
       return acc.concat(matchesEvenlyDiststributed);
     }, []);
 
     return matchesEvenlyDiststributed.map(matchArr => {
-      let match: Match = {
+      const match: Match = {
         team1: teams.find(t => t.teamId === matchArr[0]),
         team2: teams.find(t => t.teamId === matchArr[1]),
         team1Score: 0,
@@ -179,9 +179,9 @@ export class TournamentDataService {
         team2Id: matchArr[1],
         date: undefined,
         isTaken: false
-      }
+      };
       return match;
-    })
+    });
 
 
   }
@@ -189,31 +189,30 @@ export class TournamentDataService {
 
   getMatchesToPlayByTournamentId(tournamentId: string): Observable<Match[]> {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    let teams$ = tournament.collection<Team>("teams").snapshotChanges();
+    const teams$ = tournament.collection<Team>('teams').snapshotChanges();
 
-    let matchesToPlay$ = this.getMatchesToPlayForTournament(tournament, teams$);
+    const matchesToPlay$ = this.getMatchesToPlayForTournament(tournament, teams$);
 
     return matchesToPlay$;
   }
 
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {
     const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    let teams$ = tournamentDoc.collection<Team>("teams").snapshotChanges();
-    let matches$ = tournamentDoc.collection<MatchInFireStore>("matches").snapshotChanges();
+    const teams$ = tournamentDoc.collection<Team>('teams').snapshotChanges();
+    const matches$ = tournamentDoc.collection<MatchInFireStore>('matches').snapshotChanges();
 
-    const teamScores = matches$.pipe(
-      combineLatest(teams$),
+    const teamScores = combineLatest(matches$, teams$).pipe(
       map(([matchActions, teamActions]) => {
-        let teamScoresByTeamId = matchActions
+        const teamScoresByTeamId = matchActions
           .reduce((acc, matchAction) => {
-            let match = matchAction.payload.doc.data()
+            const match = matchAction.payload.doc.data();
             const team1Name = teamActions.find(t => t.payload.doc.id === match.team1.id).payload.doc.data().name;
             const team1Id = match.team1.id;
-            let team1: TeamScore = acc[match.team1.id] || this.createEmptyTeamScore(team1Name, team1Id);
+            const team1: TeamScore = acc[match.team1.id] || this.createEmptyTeamScore(team1Name, team1Id);
 
             const team2Name = teamActions.find(t => t.payload.doc.id === match.team2.id).payload.doc.data().name;
             const team2Id = match.team2.id;
-            let team2: TeamScore = acc[match.team2.id] || this.createEmptyTeamScore(team2Name, team2Id);
+            const team2: TeamScore = acc[match.team2.id] || this.createEmptyTeamScore(team2Name, team2Id);
 
             acc[match.team1.id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, matchAction.payload.doc.id);
             acc[match.team2.id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, matchAction.payload.doc.id);
@@ -242,7 +241,7 @@ export class TournamentDataService {
     return teamScores;
   }
 
-  private createEmptyTeamScore(teamName: string, teamId: string) : TeamScore {
+  private createEmptyTeamScore(teamName: string, teamId: string): TeamScore {
     return {
       name: teamName,
       teamId: teamId,
@@ -260,7 +259,7 @@ export class TournamentDataService {
   private getNewTeamScoreFromMatch(myTeam: TeamScore, myTeamScore: number, otherTeamsScore: number, matchId: string): TeamScore {
     const gameStats = new GameStats(myTeamScore, otherTeamsScore);
 
-    let newTeamScore: TeamScore = {
+    const newTeamScore: TeamScore = {
       teamId: myTeam.teamId,
       name: myTeam.name,
       score: myTeam.score + this.getPointsForTeam(myTeamScore, otherTeamsScore),
@@ -277,10 +276,10 @@ export class TournamentDataService {
   }
 
   private getPointsForTeam(myScore: number, otherTeamsScore: number): number {
-    let isWinner = myScore > otherTeamsScore;
-    let isOvertime = myScore > 11 || otherTeamsScore > 11;
-    let winnerPoints = isOvertime ? 2 : 3;
-    let loserPoints = isOvertime ? 1 : 0
+    const isWinner = myScore > otherTeamsScore;
+    const isOvertime = myScore > 11 || otherTeamsScore > 11;
+    const winnerPoints = isOvertime ? 2 : 3;
+    const loserPoints = isOvertime ? 1 : 0;
     return isWinner ? winnerPoints : loserPoints;
   }
 
@@ -292,20 +291,19 @@ export class TournamentDataService {
 
   private getMatchesToPlayForTournament(tournament: AngularFirestoreDocument<Tournament>,
     teams$: Observable<DocumentChangeAction<Team>[]>): Observable<Match[]> {
-    let matchesRaw$ = tournament.collection<MatchInFireStore>('matches').snapshotChanges();
+    const matchesRaw$ = tournament.collection<MatchInFireStore>('matches').snapshotChanges();
     const numberOfRounds$ = tournament.valueChanges().pipe(map(t => t.numberOfRounds));
 
-    const matchesToPlay$: Observable<Match[]> = matchesRaw$.pipe(
-      combineLatest(teams$, numberOfRounds$),
+    const matchesToPlay$: Observable<Match[]> = combineLatest(matchesRaw$, teams$, numberOfRounds$).pipe(
       map(([matches, teams, numberOfRounds]) => {
-        let teamScores = teams.map(t => this.createEmptyTeamScore(t.payload.doc.data().name, t.payload.doc.id));
+        const teamScores = teams.map(t => this.createEmptyTeamScore(t.payload.doc.data().name, t.payload.doc.id));
 
-        const allMatches = this.getAllMatchesToPlay(teamScores, numberOfRounds)
+        const allMatches = this.getAllMatchesToPlay(teamScores, numberOfRounds);
 
         const playedMatches = matches.map(action => {
-          let m = action.payload.doc.data();
-          let team1 = teams.find(t => t.payload.doc.id == m.team1.id)
-          let team2 = teams.find(t => t.payload.doc.id == m.team2.id)
+          const m = action.payload.doc.data();
+          const team1 = teams.find(t => t.payload.doc.id === m.team1.id);
+          const team2 = teams.find(t => t.payload.doc.id === m.team2.id);
 
           return Object.assign({}, m, <Match>{
             matchId: action.payload.doc.id,
@@ -314,18 +312,18 @@ export class TournamentDataService {
             team2: team2 && team2.payload.doc.data(),
             team2Id: team2 && team2.payload.doc.id,
             date: m.date && m.date.toDate()
-          })
+          });
         })
           .filter(m => !!m.team1)
           .filter(m => !!m.team2);
 
         return allMatches.map(m => {
-          let playedMatch = playedMatches.find(pm => pm.team1Id === m.team1Id && pm.team2Id === m.team2Id && !pm.isTaken);
+          const playedMatch = playedMatches.find(pm => pm.team1Id === m.team1Id && pm.team2Id === m.team2Id && !pm.isTaken);
           if (!!playedMatch) {
             playedMatch.isTaken = true;
           }
-          return playedMatch || m
-        })
+          return playedMatch || m;
+        });
       }
       )
     );

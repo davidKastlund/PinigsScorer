@@ -17,7 +17,7 @@ export class ScoreTableComponent implements OnInit {
 
   ngOnInit() {
   }
-  
+
   openScoreTableInfo() {
     this.bottomSheet.open(ScoreTableInfoBottomSheetComponent);
   }

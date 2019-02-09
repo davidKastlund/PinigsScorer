@@ -20,7 +20,7 @@ export class EditTeamDialogComponent implements OnInit {
     const editedTeam: EditTeamDialogData = {
       name: this.data.name,
       id: this.data.id
-    }
+    };
 
     this.dialogRef.close(editedTeam);
   }
