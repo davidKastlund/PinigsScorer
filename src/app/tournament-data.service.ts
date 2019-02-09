@@ -136,16 +136,14 @@ export class TournamentDataService {
   }
 
   private getAllMatchesToPlay(teams: TeamScore[], numberOfRounds: number): Match[] {
-    let teamsArr = [];
-    for (let i = 0; i < teams.length; i++) {
-      teamsArr[i] = teams[i].teamId;
-    }
+    const teamIds = teams.map(t => t.teamId);
+    
     let r = 2;
-    let n = teamsArr.length;
-    let resultArr = this.getCombinations(teamsArr, n, r);
+    let n = teamIds.length;
+    let resultArr = this.getCombinations(teamIds, n, r);
     let matchesEvenlyDiststributed = [];
 
-    let playedMostByTeamId = teamsArr.reduce((acc, t) => {
+    let playedMostByTeamId = teamIds.reduce((acc, t) => {
       acc[t] = 0;
       return acc;
     }, {})
@@ -209,31 +207,13 @@ export class TournamentDataService {
         let teamScoresByTeamId = matchActions
           .reduce((acc, matchAction) => {
             let match = matchAction.payload.doc.data()
-            let team1: TeamScore = acc[match.team1.id] || {
-              name: teamActions.find(t => t.payload.doc.id === match.team1.id).payload.doc.data().name,
-              teamId: match.team1.id,
-              score: 0,
-              playedMatchesCount: 0,
-              playedMatches: [],
-              gameWinCount: 0,
-              gameWinOvertimeCount: 0,
-              gameLoseOvertimeCount: 0,
-              gameLoseCount: 0,
-              ballDifference: 0
-            };
+            const team1Name = teamActions.find(t => t.payload.doc.id === match.team1.id).payload.doc.data().name;
+            const team1Id = match.team1.id;
+            let team1: TeamScore = acc[match.team1.id] || this.createEmptyTeamScore(team1Name, team1Id);
 
-            let team2: TeamScore = acc[match.team2.id] || {
-              name: teamActions.find(t => t.payload.doc.id === match.team2.id).payload.doc.data().name,
-              teamId: match.team2.id,
-              score: 0,
-              playedMatchesCount: 0,
-              gameWinCount: 0,
-              gameWinOvertimeCount: 0,
-              gameLoseOvertimeCount: 0,
-              gameLoseCount: 0,
-              playedMatches: [],
-              ballDifference: 0
-            };
+            const team2Name = teamActions.find(t => t.payload.doc.id === match.team2.id).payload.doc.data().name;
+            const team2Id = match.team2.id;
+            let team2: TeamScore = acc[match.team2.id] || this.createEmptyTeamScore(team2Name, team2Id);
 
             acc[match.team1.id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, matchAction.payload.doc.id);
             acc[match.team2.id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, matchAction.payload.doc.id);
@@ -241,37 +221,40 @@ export class TournamentDataService {
             return acc;
           }, {});
 
-        teamActions.forEach(t => {
-          teamScoresByTeamId[t.payload.doc.id] = teamScoresByTeamId[t.payload.doc.id] || <TeamScore>{
-            name: t.payload.doc.data().name,
-            score: 0,
-            playedMatches: [],
-            gameWinCount: 0,
-            gameWinOvertimeCount: 0,
-            gameLoseOvertimeCount: 0,
-            gameLoseCount: 0,
-            ballDifference: 0,
-            teamId: t.payload.doc.id,
-            playedMatchesCount: 0
-          };
-        })
-
-        return Object.keys(teamScoresByTeamId).map(key => teamScoresByTeamId[key])
-          .sort((a, b) => {
-            const scoreDiff = b.score - a.score;
-            if (scoreDiff !== 0) {
-              return scoreDiff;
-            }
-            const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
-            if (matchDiff !== 0) {
-              return matchDiff;
-            }
-            return b.ballDifference - a.ballDifference;
-          });
+        return teamActions.map(t => {
+          const teamName = t.payload.doc.data().name;
+          const teamId = t.payload.doc.id;
+          return teamScoresByTeamId[t.payload.doc.id] ||  this.createEmptyTeamScore(teamName, teamId);
+        }).sort((a: TeamScore, b: TeamScore) => {
+          const scoreDiff = b.score - a.score;
+          if (scoreDiff !== 0) {
+            return scoreDiff;
+          }
+          const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
+          if (matchDiff !== 0) {
+            return matchDiff;
+          }
+          return b.ballDifference - a.ballDifference;
+        });
       })
     );
 
     return teamScores;
+  }
+
+  private createEmptyTeamScore(teamName: string, teamId: string) : TeamScore {
+    return {
+      name: teamName,
+      teamId: teamId,
+      score: 0,
+      playedMatchesCount: 0,
+      gameWinCount: 0,
+      gameWinOvertimeCount: 0,
+      gameLoseOvertimeCount: 0,
+      gameLoseCount: 0,
+      playedMatches: [],
+      ballDifference: 0
+    };
   }
 
   private getNewTeamScoreFromMatch(myTeam: TeamScore, myTeamScore: number, otherTeamsScore: number, matchId: string): TeamScore {
@@ -315,22 +298,7 @@ export class TournamentDataService {
     const matchesToPlay$: Observable<Match[]> = matchesRaw$.pipe(
       combineLatest(teams$, numberOfRounds$),
       map(([matches, teams, numberOfRounds]) => {
-        let teamScores = teams.map(t => {
-          let team: TeamScore =
-          {
-            teamId: t.payload.doc.id,
-            name: t.payload.doc.data().name,
-            score: 0,
-            playedMatchesCount: 0,
-            gameWinCount: 0,
-            gameWinOvertimeCount: 0,
-            gameLoseOvertimeCount: 0,
-            gameLoseCount: 0,
-            ballDifference: 0,
-            playedMatches: []
-          }
-          return team;
-        });
+        let teamScores = teams.map(t => this.createEmptyTeamScore(t.payload.doc.data().name, t.payload.doc.id));
 
         const allMatches = this.getAllMatchesToPlay(teamScores, numberOfRounds)
 
