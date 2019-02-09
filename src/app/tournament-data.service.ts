@@ -202,7 +202,7 @@ export class TournamentDataService {
           .sort((b, a) => {
             const aDate = a.payload.doc.data().date.toDate();
             const bDate = b.payload.doc.data().date.toDate();
-          
+
             return aDate > bDate ? -1 : aDate < bDate ? 1 : 0;
           })
           .map(matchAction => {
@@ -239,28 +239,22 @@ export class TournamentDataService {
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {
     const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
     const teams$ = tournamentDoc.collection<Team>('teams').snapshotChanges();
-    const matches$ = tournamentDoc.collection<MatchInFireStore>('matches').snapshotChanges();
+    const matchesToPlay$ = this.getMatchesToPlayByTournamentId(tournamentId);
 
-    return combineLatest(matches$, teams$).pipe(
-      map(([matchActions, teamActions]) => {
+    return combineLatest(matchesToPlay$, teams$).pipe(
+      map(([matchesToPlay, teamActions]) => {
         const initialTeamScoresByTeamId = teamActions.reduce((acc, teamAction) => {
           acc[teamAction.payload.doc.id] = this.createEmptyTeamScore(teamAction.payload.doc.data().name, teamAction.payload.doc.id);
           return acc;
         }, {});
 
-        const teamScoresByTeamId = matchActions
-          .reduce((acc, matchAction) => {
-            const matchDocData = matchAction.payload.doc.data();
-            const match = {
-              id: matchAction.payload.doc.id,
-              team1Id: matchDocData.team1.id,
-              team2Id: matchDocData.team2.id,
-              team1Score: matchDocData.team1Score,
-              team2Score: matchDocData.team2Score
-            };
+        const playedMatches = matchesToPlay
+          .filter(m => !!m.matchId);
 
-            acc[match.team1Id] = this.getNewTeamScoreFromMatch(acc[match.team1Id], match.team1Score, match.team2Score, match.id);
-            acc[match.team2Id] = this.getNewTeamScoreFromMatch(acc[match.team2Id], match.team2Score, match.team1Score, match.id);
+        const teamScoresByTeamId = playedMatches
+          .reduce((acc, match) => {
+            acc[match.team1Id] = this.getNewTeamScoreFromMatch(acc[match.team1Id], match.team1Score, match.team2Score, match.matchId);
+            acc[match.team2Id] = this.getNewTeamScoreFromMatch(acc[match.team2Id], match.team2Score, match.team1Score, match.matchId);
 
             return acc;
           }, initialTeamScoresByTeamId);
