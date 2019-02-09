@@ -34,12 +34,16 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
       .pipe(
         combineLatest(this.matchesToPlayFilter$),
         map(([matches, filter]) => matches
-          .filter(m => !filter || m.team1.name.toLowerCase().includes(filter.toLowerCase()) || m.team2.name.toLowerCase().includes(filter.toLowerCase()))
+          .filter(m => !filter || 
+            this.stringContains(m.team1.name, filter) || 
+            this.stringContains(m.team2.name, filter))
         )
       );
-
-
     }
+  }
+
+  private stringContains(str: string, compareStr: string) : boolean {
+    return str && str.toLocaleLowerCase().includes(compareStr);
   }
 
   removeMatch(matchId: string) {

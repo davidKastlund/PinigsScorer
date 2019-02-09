@@ -184,19 +184,19 @@ export class TournamentDataService {
       }
       return match;
     })
-  
-  
+
+
   }
 
 
-getMatchesToPlayByTournamentId(tournamentId: string) : Observable<Match[]> {
-  const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-  let teams$ = tournament.collection<Team>("teams").snapshotChanges();
+  getMatchesToPlayByTournamentId(tournamentId: string): Observable<Match[]> {
+    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    let teams$ = tournament.collection<Team>("teams").snapshotChanges();
 
-  let matchesToPlay$ = this.getMatchesToPlayForTournament(tournament, teams$);
+    let matchesToPlay$ = this.getMatchesToPlayForTournament(tournament, teams$);
 
-  return matchesToPlay$;
-}
+    return matchesToPlay$;
+  }
 
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {
 
