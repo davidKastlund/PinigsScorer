@@ -28,7 +28,20 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.tournament) {
       const tournamentId = changes.tournament.currentValue.id;
-      this.pointSummary$ = this.tournamentData.getTeamScores(tournamentId);
+      this.pointSummary$ = this.tournamentData.getTeamScores(tournamentId)
+      .pipe(
+        map(teamScores => teamScores.sort((a: TeamScore, b: TeamScore) => {
+          const scoreDiff = b.score - a.score;
+          if (scoreDiff !== 0) {
+            return scoreDiff;
+          }
+          const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
+          if (matchDiff !== 0) {
+            return matchDiff;
+          }
+          return b.ballDifference - a.ballDifference;
+        }))
+      );
       const matchesToPlay$ = this.tournamentData.getMatchesToPlayByTournamentId(tournamentId);
       this.matchesToPlayFiltered$ = combineLatest(matchesToPlay$, this.matchesToPlayFilter$)
       .pipe(

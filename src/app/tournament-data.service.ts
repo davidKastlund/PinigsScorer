@@ -201,44 +201,33 @@ export class TournamentDataService {
     const teams$ = tournamentDoc.collection<Team>('teams').snapshotChanges();
     const matches$ = tournamentDoc.collection<MatchInFireStore>('matches').snapshotChanges();
 
-    const teamScores = combineLatest(matches$, teams$).pipe(
+    return combineLatest(matches$, teams$).pipe(
       map(([matchActions, teamActions]) => {
+        const initialTeamScoresByTeamId = teamActions.reduce((acc, teamAction) => {
+          acc[teamAction.payload.doc.id] = this.createEmptyTeamScore(teamAction.payload.doc.data().name, teamAction.payload.doc.id);
+          return acc;
+        }, {});
+
         const teamScoresByTeamId = matchActions
           .reduce((acc, matchAction) => {
-            const match = matchAction.payload.doc.data();
-            const team1Name = teamActions.find(t => t.payload.doc.id === match.team1.id).payload.doc.data().name;
-            const team1Id = match.team1.id;
-            const team1: TeamScore = acc[match.team1.id] || this.createEmptyTeamScore(team1Name, team1Id);
+            const matchDocData = matchAction.payload.doc.data();
+            const match = {
+              id: matchAction.payload.doc.id,
+              team1Id: matchDocData.team1.id,
+              team2Id: matchDocData.team2.id,
+              team1Score: matchDocData.team1Score,
+              team2Score: matchDocData.team2Score
+            };
 
-            const team2Name = teamActions.find(t => t.payload.doc.id === match.team2.id).payload.doc.data().name;
-            const team2Id = match.team2.id;
-            const team2: TeamScore = acc[match.team2.id] || this.createEmptyTeamScore(team2Name, team2Id);
-
-            acc[match.team1.id] = this.getNewTeamScoreFromMatch(team1, match.team1Score, match.team2Score, matchAction.payload.doc.id);
-            acc[match.team2.id] = this.getNewTeamScoreFromMatch(team2, match.team2Score, match.team1Score, matchAction.payload.doc.id);
+            acc[match.team1Id] = this.getNewTeamScoreFromMatch(acc[match.team1Id], match.team1Score, match.team2Score, match.id);
+            acc[match.team2Id] = this.getNewTeamScoreFromMatch(acc[match.team2Id], match.team2Score, match.team1Score, match.id);
 
             return acc;
-          }, {});
+          }, initialTeamScoresByTeamId);
 
-        return teamActions.map(t => {
-          const teamName = t.payload.doc.data().name;
-          const teamId = t.payload.doc.id;
-          return teamScoresByTeamId[t.payload.doc.id] ||  this.createEmptyTeamScore(teamName, teamId);
-        }).sort((a: TeamScore, b: TeamScore) => {
-          const scoreDiff = b.score - a.score;
-          if (scoreDiff !== 0) {
-            return scoreDiff;
-          }
-          const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
-          if (matchDiff !== 0) {
-            return matchDiff;
-          }
-          return b.ballDifference - a.ballDifference;
-        });
+        return Object.values(teamScoresByTeamId);
       })
     );
-
-    return teamScores;
   }
 
   private createEmptyTeamScore(teamName: string, teamId: string): TeamScore {
