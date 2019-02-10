@@ -114,7 +114,7 @@ export class TournamentDataService {
         const playedMatches = this.getPlayedMatches(matchActions, teamActions);
 
         return allMatchesToPlay.map(matchToPlay => {
-          const playedMatch = playedMatches.find(pm => 
+          const playedMatch = playedMatches.find(pm =>
             pm.team1Id === matchToPlay.team1Id &&
             pm.team2Id === matchToPlay.team2Id &&
             !pm.isTaken);
