@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreDocument, DocumentChangeAction } from '@angular/fire/firestore';
+import { AngularFirestore, DocumentChangeAction } from '@angular/fire/firestore';
 import { MatSnackBar } from '@angular/material';
 import { Tournament } from './Tournament';
 import { AddedMatchDto } from './game-list/AddedMatchDto';
@@ -47,8 +47,6 @@ export class TournamentDataService {
       duration: 2000,
     });
   }
-
-
 
   addTeam(teamName: string, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
@@ -104,102 +102,54 @@ export class TournamentDataService {
     });
   }
 
-  private getAllMatchesToPlay(teams: DocumentChangeAction<Team>[], numberOfRounds: number): Match[] {
-    const teamIds = teams.map(t => t.payload.doc.id);
-    const resultArr = this.combinationHelper.getCombinations(teamIds, 2);
-    let matchesEvenlyDiststributed = [];
-
-    const playedMostByTeamId = teamIds.reduce((acc, t) => {
-      acc[t] = 0;
-      return acc;
-    }, {});
-
-    for (let i = 0; i < resultArr.length; i++) {
-      const nextMatch = resultArr
-        .filter(m => !matchesEvenlyDiststributed.some(am => am[0] === m[0] && am[1] === m[1]))
-        .sort((a, b) => {
-          const aPlayedWeight = playedMostByTeamId[a[0]] + playedMostByTeamId[a[1]];
-          const bPlayedWeight = playedMostByTeamId[b[0]] + playedMostByTeamId[b[1]];
-          return aPlayedWeight - bPlayedWeight;
-        })[0];
-
-      playedMostByTeamId[nextMatch[0]] = playedMostByTeamId[nextMatch[0]] + 1;
-      playedMostByTeamId[nextMatch[1]] = playedMostByTeamId[nextMatch[1]] + 1;
-
-      matchesEvenlyDiststributed.push(nextMatch);
-    }
-
-    const newLocal = Array.from({ length: numberOfRounds }, (v, k) => k + 1);
-    matchesEvenlyDiststributed = newLocal.reduce((acc) => {
-      return acc.concat(matchesEvenlyDiststributed);
-    }, []);
-
-    return matchesEvenlyDiststributed.map(matchArr => {
-      const match: Match = {
-        team1: teams.find(t => t.payload.doc.id === matchArr[0]).payload.doc.data(),
-        team2: teams.find(t => t.payload.doc.id === matchArr[1]).payload.doc.data(),
-        team1Score: 0,
-        team2Score: 0,
-        matchId: undefined,
-        team1Id: matchArr[0],
-        team2Id: matchArr[1],
-        date: undefined,
-        isTaken: false
-      };
-      return match;
-    });
-
-
-  }
-
-
   getMatchesToPlayByTournamentId(tournamentId: string): Observable<Match[]> {
-    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    const teamActions$ = tournament.collection<Team>('teams').snapshotChanges();
-    const matchActions$ = tournament.collection<MatchInFireStore>('matches').snapshotChanges();
-    const numberOfRounds$ = tournament.valueChanges().pipe(map(t => t.numberOfRounds));
+    const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    const teamActions$ = tournamentDoc.collection<Team>('teams').snapshotChanges();
+    const matchActions$ = tournamentDoc.collection<MatchInFireStore>('matches').snapshotChanges();
+    const numberOfRounds$ = tournamentDoc.valueChanges().pipe(map(t => t.numberOfRounds));
 
-    const matchesToPlay$: Observable<Match[]> = combineLatest(matchActions$, teamActions$, numberOfRounds$).pipe(
+    return combineLatest(matchActions$, teamActions$, numberOfRounds$).pipe(
       map(([matchActions, teamActions, numberOfRounds]) => {
-        const allMatches = this.getAllMatchesToPlay(teamActions, numberOfRounds);
+        const allMatchesToPlay = this.getAllMatchesToPlay(teamActions, numberOfRounds);
+        const playedMatches = this.getPlayedMatches(matchActions, teamActions);
 
-        const playedMatches = matchActions
-          .filter(m => !!m.payload.doc.data().date)
-          .sort((b, a) => {
-            const aDate = a.payload.doc.data().date.toDate();
-            const bDate = b.payload.doc.data().date.toDate();
+        return allMatchesToPlay.map(matchToPlay => {
+          const playedMatch = playedMatches.find(pm => 
+            pm.team1Id === matchToPlay.team1Id &&
+            pm.team2Id === matchToPlay.team2Id &&
+            !pm.isTaken);
 
-            return aDate > bDate ? -1 : aDate < bDate ? 1 : 0;
-          })
-          .map(matchAction => {
-            const m = matchAction.payload.doc.data();
-            const team1 = teamActions.find(t => t.payload.doc.id === m.team1.id);
-            const team2 = teamActions.find(t => t.payload.doc.id === m.team2.id);
-
-            return Object.assign({}, m, <Match>{
-              matchId: matchAction.payload.doc.id,
-              team1: team1 && team1.payload.doc.data(),
-              team1Id: team1 && team1.payload.doc.id,
-              team2: team2 && team2.payload.doc.data(),
-              team2Id: team2 && team2.payload.doc.id,
-              date: m.date && m.date.toDate()
-            });
-          })
-          .filter(m => !!m.team1)
-          .filter(m => !!m.team2);
-
-        return allMatches.map(m => {
-          const playedMatch = playedMatches.find(pm => pm.team1Id === m.team1Id && pm.team2Id === m.team2Id && !pm.isTaken);
           if (!!playedMatch) {
             playedMatch.isTaken = true;
           }
-          return playedMatch || m;
+          return playedMatch || matchToPlay;
         });
-      }
-      )
+      })
     );
+  }
 
-    return matchesToPlay$;
+  private getPlayedMatches(matchActions: DocumentChangeAction<MatchInFireStore>[], teamActions: DocumentChangeAction<Team>[]) {
+    return matchActions
+      .filter(m => !!m.payload.doc.data().date)
+      .sort((b, a) => {
+        const aDate = a.payload.doc.data().date.toDate();
+        const bDate = b.payload.doc.data().date.toDate();
+        return aDate > bDate ? -1 : aDate < bDate ? 1 : 0;
+      })
+      .map(matchAction => {
+        const m = matchAction.payload.doc.data();
+        const team1 = teamActions.find(t => t.payload.doc.id === m.team1.id);
+        const team2 = teamActions.find(t => t.payload.doc.id === m.team2.id);
+        return Object.assign({}, m, <Match>{
+          matchId: matchAction.payload.doc.id,
+          team1: team1 && team1.payload.doc.data(),
+          team1Id: team1 && team1.payload.doc.id,
+          team2: team2 && team2.payload.doc.data(),
+          team2Id: team2 && team2.payload.doc.id,
+          date: m.date && m.date.toDate()
+        });
+      })
+      .filter(m => !!m.team1 && !!m.team1);
   }
 
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {
@@ -214,10 +164,8 @@ export class TournamentDataService {
           return acc;
         }, {});
 
-        const playedMatches = matchesToPlay
-          .filter(m => !!m.matchId);
-
-        const teamScoresByTeamId = playedMatches
+        const teamScoresByTeamId = matchesToPlay
+          .filter(m => !!m.matchId)
           .reduce((acc, match) => {
             acc[match.team1Id] = this.getNewTeamScoreFromMatch(acc[match.team1Id], match.team1Score, match.team2Score, match.matchId);
             acc[match.team2Id] = this.getNewTeamScoreFromMatch(acc[match.team2Id], match.team2Score, match.team1Score, match.matchId);
@@ -228,6 +176,28 @@ export class TournamentDataService {
         return Object.values(teamScoresByTeamId);
       })
     );
+  }
+
+  private getAllMatchesToPlay(teams: DocumentChangeAction<Team>[], numberOfRounds: number): Match[] {
+    const teamIds = teams.map(t => t.payload.doc.id);
+    const teamIdCombinations = this.combinationHelper.getAllPossibleCombinationsEvenlyDistributed(teamIds, numberOfRounds);
+
+    return teamIdCombinations.map(matchArr => {
+      const team1Id = matchArr[0];
+      const team2Id = matchArr[1];
+      const match: Match = {
+        team1: teams.find(t => t.payload.doc.id === team1Id).payload.doc.data(),
+        team2: teams.find(t => t.payload.doc.id === team2Id).payload.doc.data(),
+        team1Score: 0,
+        team2Score: 0,
+        matchId: undefined,
+        team1Id: team1Id,
+        team2Id: team2Id,
+        date: undefined,
+        isTaken: false
+      };
+      return match;
+    });
   }
 
   private createEmptyTeamScore(teamName: string, teamId: string): TeamScore {
