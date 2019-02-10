@@ -85,18 +85,17 @@ export class TournamentDataService {
     });
   }
 
-  changeNameOfTournament(name: string, tournamentId: string) {
-    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-
-    tournament.ref.update({ name: name });
+  async changeNameOfTournament(name: string, tournamentId: string) {
+    const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    await tournamentDoc.update({ name: name });
     this.snackBar.open('Namnet är ändrat!', null, {
       duration: 2000,
     });
   }
 
   changeNumberOfRounds(numberOfRounds: number, tournamentId: string) {
-    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
-    tournament.update({ numberOfRounds });
+    const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    tournamentDoc.update({ numberOfRounds });
     this.snackBar.open('Antal interna möten är uppdaterat är uppdaterat!', null, {
       duration: 2000,
     });
