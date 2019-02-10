@@ -54,8 +54,8 @@ export class AppComponent implements OnInit {
       );
 
 
-    this.selectedTournamentId$.pipe(
-      tap(tournamentId => {
+    this.selectedTournamentId$
+      .subscribe(tournamentId => {
         if (!!tournamentId) {
           this.tournament$ = db.doc<Tournament>(`/tournaments/${tournamentId}`).snapshotChanges().pipe(
             map(action => {
@@ -70,8 +70,7 @@ export class AppComponent implements OnInit {
             })
           );
         }
-      })
-    ).subscribe();
+      });
   }
 
   ngOnInit(): void {
