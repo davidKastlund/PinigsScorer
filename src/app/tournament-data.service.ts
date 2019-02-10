@@ -12,6 +12,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { Match } from './Match';
 import { map } from 'rxjs/operators';
 import { GameStats } from './GameStats';
+import { CombinationHelperService } from './combination-helper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,8 @@ import { GameStats } from './GameStats';
 export class TournamentDataService {
 
   constructor(private db: AngularFirestore,
-    private snackBar: MatSnackBar) { }
+    private snackBar: MatSnackBar,
+    private combinationHelper: CombinationHelperService) { }
 
   removeMatch(matchId: string, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
@@ -102,45 +104,9 @@ export class TournamentDataService {
     });
   }
 
-  private combinationUtil(arr: string[], data: string[],
-    start: number, end: number,
-    index: number, r: number, resultArr: string[][]) {
-    // Current combination is
-    // ready to be printed,
-    // print it
-    if (index === r) {
-      resultArr.push(Object.assign([], data));
-      return;
-    }
-
-    // replace index with all
-    // possible elements. The
-    // condition "end-i+1 >=
-    // r-index" makes sure that
-    // including one element
-    // at index will make a
-    // combination with remaining
-    // elements at remaining positions
-    for (let i = start; i <= end && end - i + 1 >= r - index; i++) {
-      data[index] = arr[i];
-      this.combinationUtil(arr, data, i + 1, end, index + 1, r, resultArr);
-    }
-  }
-
-  private getCombinations(arr: string[], n: number, r: number): string[][] {
-    const data: string[] = new Array<string>(r);
-    const resultArr: string[][] = [];
-    this.combinationUtil(arr, data, 0, n - 1, 0, r, resultArr);
-
-    return resultArr;
-  }
-
   private getAllMatchesToPlay(teams: DocumentChangeAction<Team>[], numberOfRounds: number): Match[] {
     const teamIds = teams.map(t => t.payload.doc.id);
-
-    const r = 2;
-    const n = teamIds.length;
-    const resultArr = this.getCombinations(teamIds, n, r);
+    const resultArr = this.combinationHelper.getCombinations(teamIds, 2);
     let matchesEvenlyDiststributed = [];
 
     const playedMostByTeamId = teamIds.reduce((acc, t) => {
