@@ -5,7 +5,7 @@ import { TeamScore } from '../TeamScore';
 import { TournamentDataService } from '../tournament-data.service';
 import { Match } from '../Match';
 import { AddedMatchDto } from '../game-list/AddedMatchDto';
-import { EditTeamDialogData } from '../edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from '../edit-team-dialog/EditTeamDialogData';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -74,7 +74,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
     this.tournamentData.addTeam(teamName, this.tournament.id);
   }
 
-  onTeamEdited(team: EditTeamDialogData) {
+  onTeamEdited(team: EditTeamDto) {
     this.tournamentData.editTeam(team, this.tournament.id);
   }
 

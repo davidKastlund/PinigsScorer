@@ -1,4 +1,4 @@
-export interface EditTeamDialogData {
+export interface EditTeamDto {
   name: string;
   id: string;
 }

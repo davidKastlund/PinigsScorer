@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { TeamScore } from './../TeamScore';
-import { EditTeamDialogData } from '../edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from '../edit-team-dialog/EditTeamDialogData';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { EditTeamDialogComponent } from '../edit-team-dialog/edit-team-dialog.component';
 import { ConfirmDialogData } from '../confirm-dialog/ConfirmDialogData';
@@ -17,7 +17,7 @@ export class TournamentSettingsComponent implements OnInit {
   @Input() tournamentName: string;
   @Input() numberOfRounds: number;
 
-  @Output() teamEdited = new EventEmitter<EditTeamDialogData>();
+  @Output() teamEdited = new EventEmitter<EditTeamDto>();
   @Output() teamRemoved = new EventEmitter<TeamScore>();
   @Output() teamAdded = new EventEmitter<string>();
   @Output() tournamentNameChanged = new EventEmitter<string>();
@@ -33,13 +33,13 @@ export class TournamentSettingsComponent implements OnInit {
 
 
   startUpdateTeam(team: TeamScore) {
-    const data: EditTeamDialogData = {
+    const data: EditTeamDto = {
       name: team.name,
       id: team.teamId
     };
     this.dialog.open(EditTeamDialogComponent, { width: '600px', data })
       .afterClosed()
-      .subscribe((result: EditTeamDialogData) => {
+      .subscribe((result: EditTeamDto) => {
         if (!!result) {
           this.teamEdited.emit(result);
         }

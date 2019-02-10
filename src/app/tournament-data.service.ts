@@ -5,7 +5,7 @@ import { Tournament } from './Tournament';
 import { AddedMatchDto } from './game-list/AddedMatchDto';
 import * as firebase from 'firebase/app';
 import { MatchInFireStore } from './MatchInFireStore';
-import { EditTeamDialogData } from './edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from './edit-team-dialog/EditTeamDialogData';
 import { Team } from './Team';
 import { TeamScore } from './TeamScore';
 import { Observable, combineLatest } from 'rxjs';
@@ -57,7 +57,7 @@ export class TournamentDataService {
     });
   }
 
-  editTeam(team: EditTeamDialogData, tournamentId: string) {
+  editTeam(team: EditTeamDto, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
     tournament.collection<Team>('teams').doc(team.id).update({ name: team.name });
