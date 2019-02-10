@@ -5,7 +5,7 @@ import { Tournament } from './Tournament';
 import { AddedMatchDto } from './game-list/AddedMatchDto';
 import * as firebase from 'firebase/app';
 import { MatchInFireStore } from './MatchInFireStore';
-import { EditTeamDto } from './edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from './edit-team-dialog/EditTeamDto';
 import { Team } from './Team';
 import { TeamScore } from './TeamScore';
 import { Observable, combineLatest } from 'rxjs';

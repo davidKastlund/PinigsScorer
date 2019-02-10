@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
-import { EditTeamDto } from './EditTeamDialogData';
+import { EditTeamDto } from './EditTeamDto';
 
 @Component({
   selector: 'app-edit-team-dialog',

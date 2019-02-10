@@ -5,7 +5,7 @@ import { TeamScore } from '../TeamScore';
 import { TournamentDataService } from '../tournament-data.service';
 import { Match } from '../Match';
 import { AddedMatchDto } from '../game-list/AddedMatchDto';
-import { EditTeamDto } from '../edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from '../edit-team-dialog/EditTeamDto';
 import { map } from 'rxjs/operators';
 
 @Component({

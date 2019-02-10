@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { TeamScore } from './../TeamScore';
-import { EditTeamDto } from '../edit-team-dialog/EditTeamDialogData';
+import { EditTeamDto } from '../edit-team-dialog/EditTeamDto';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { EditTeamDialogComponent } from '../edit-team-dialog/edit-team-dialog.component';
 import { ConfirmDialogData } from '../confirm-dialog/ConfirmDialogData';
