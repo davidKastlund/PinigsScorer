@@ -32,14 +32,28 @@
       <span>Logga ut</span>
     </button>
   </mat-menu>
+
   <div *ngIf="tournament$ | async as tournament">
     <app-tournament-detail [tournament]="tournament"></app-tournament-detail>
   </div>
 </div>
-<ng-template #showLogin>
-  <p>Logga in först</p>
-  <input type="text" [(ngModel)]="email" name="email" />
-  <input type="password" [(ngModel)]="password" name="password" />
 
-  <button (click)="login()">logga in</button>
+<ng-template #showLogin>
+  <div class="login-container">
+    <h1>PingisAppen</h1>
+    <mat-card>
+      <mat-card-content>
+          <mat-form-field class="example-full-width">
+            <input matInput type="text" placeholder="Epost" [(ngModel)]="email" name="email" />
+          </mat-form-field>
+    
+          <mat-form-field class="example-full-width">
+            <input matInput type="password" placeholder="Lösenord" [(ngModel)]="password" name="password" />
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button (click)="login()">logga in</button>
+        </mat-card-actions>
+    </mat-card>
+  </div>
 </ng-template>
