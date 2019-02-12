@@ -49,13 +49,21 @@
       </mat-expansion-panel-header>
       <form class="example-form">
         <mat-form-field class="example-full-width">
-          <input matInput type="text" placeholder="Namn" [(ngModel)]="tournamentName" (ngModelChange)="onTournamentNameChanged($event)"
-            name="tournamentName" />
+          <input matInput type="text" placeholder="Namn" [(ngModel)]="tournamentName"
+            (ngModelChange)="onTournamentNameChanged($event)" name="tournamentName" />
         </mat-form-field>
         <mat-form-field class="example-full-width">
           <input matInput type="number" placeholder="Antal interna möten" [min]="1" [max]="5" name="numberOfRounds"
             [ngModel]="numberOfRounds" (ngModelChange)="onNumberOfRoundsChanged($event)" />
         </mat-form-field>
+        <button mat-raised-button color="warn" style="margin-right: 10px" (click)="tournamentRemoved.emit()">
+          <mat-icon>delete</mat-icon>
+          Ta bort turnering
+        </button>
+        <button mat-raised-button color="primary" (click)="tournamentIsDefault.emit()">
+          <mat-icon>stars</mat-icon>
+          Sätt som default
+        </button>
       </form>
     </mat-expansion-panel>
   </mat-accordion>

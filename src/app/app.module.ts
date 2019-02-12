@@ -19,6 +19,7 @@ import { ScoreTableComponent } from './score-table/score-table.component';
 import { GameListComponent } from './game-list/game-list.component';
 import { TournamentSettingsComponent } from './tournament-settings/tournament-settings.component';
 import { TournamentDetailComponent } from './tournament-detail/tournament-detail.component';
+import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { TournamentDetailComponent } from './tournament-detail/tournament-detail
     ScoreTableComponent,
     GameListComponent,
     TournamentSettingsComponent,
-    TournamentDetailComponent
+    TournamentDetailComponent,
+    LoginDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -49,7 +51,8 @@ import { TournamentDetailComponent } from './tournament-detail/tournament-detail
     AddNewGameComponent,
     ConfirmDialogComponent,
     EditTeamDialogComponent,
-    ScoreTableInfoBottomSheetComponent
+    ScoreTableInfoBottomSheetComponent,
+    LoginDialogComponent,
   ],
   providers: [],
   bootstrap: [AppComponent]

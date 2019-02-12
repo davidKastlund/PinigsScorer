@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentChangeAction } from '@angular/fire/firestore';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatDialog } from '@angular/material';
 import { Tournament } from './Tournament';
 import { AddedMatchDto } from './game-list/AddedMatchDto';
 import * as firebase from 'firebase/app';
@@ -10,9 +10,13 @@ import { Team } from './Team';
 import { TeamScore } from './TeamScore';
 import { Observable, combineLatest } from 'rxjs';
 import { Match } from './Match';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { GameStats } from './GameStats';
 import { CombinationHelperService } from './combination-helper.service';
+import { GlobalSettings } from './GlobalSettings';
+import { TournamentWithId } from './TournamentWithId';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +25,9 @@ export class TournamentDataService {
 
   constructor(private db: AngularFirestore,
     private snackBar: MatSnackBar,
-    private combinationHelper: CombinationHelperService) { }
+    private combinationHelper: CombinationHelperService,
+    private afAuth: AngularFireAuth,
+    private dialog: MatDialog) { }
 
   removeMatch(matchId: string, tournamentId: string) {
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
@@ -31,7 +37,26 @@ export class TournamentDataService {
     });
   }
 
-  addMatch(addedMatch: AddedMatchDto, tournamentId: string) {
+  private getCanEdit(): Promise<firebase.User> {
+    return this.afAuth.user.pipe(take(1))
+      .toPromise()
+      .then(existingUser => {
+        if (!!existingUser) {
+          return existingUser;
+        }
+        return this.dialog.open(LoginDialogComponent).afterClosed().toPromise()
+          .then(user => {
+            if (user) {
+              return user;
+            } else {
+              return Promise.reject('Nånting gick fel när du skulle logga in!');
+            }
+          });
+      });
+  }
+
+  async addMatch(addedMatch: AddedMatchDto, tournamentId: string) {
+    await this.getCanEdit()
     const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
 
     const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
@@ -46,6 +71,7 @@ export class TournamentDataService {
     this.snackBar.open('Matchen är tillagd!', null, {
       duration: 2000,
     });
+
   }
 
   addTeam(teamName: string, tournamentId: string) {
@@ -105,7 +131,7 @@ export class TournamentDataService {
     const tournamentDoc = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
     const teamActions$ = tournamentDoc.collection<Team>('teams').snapshotChanges();
     const matchActions$ = tournamentDoc.collection<MatchInFireStore>('matches').snapshotChanges();
-    const numberOfRounds$ = tournamentDoc.valueChanges().pipe(map(t => t.numberOfRounds));
+    const numberOfRounds$ = tournamentDoc.valueChanges().pipe(map(t => t && t.numberOfRounds));
 
     return combineLatest(matchActions$, teamActions$, numberOfRounds$).pipe(
       map(([matchActions, teamActions, numberOfRounds]) => {
@@ -149,6 +175,57 @@ export class TournamentDataService {
         });
       })
       .filter(m => !!m.team1 && !!m.team1);
+  }
+
+  addNewTournament(newTournamteName: string): Promise<string> {
+    return this.db.collection<Tournament>('tournaments')
+      .add({ name: newTournamteName, numberOfRounds: 1 })
+      .then(ref => ref.id);
+  }
+
+  getTournaments(): Observable<TournamentWithId[]> {
+    return this.db.collection<Tournament>('tournaments').snapshotChanges()
+      .pipe(
+        map(actions => actions.map(t => (<TournamentWithId>{
+          id: t.payload.doc.id,
+          name: t.payload.doc.data().name
+        }))
+        )
+      );
+  }
+
+  getTournamentById(tournamentId: string): Observable<TournamentWithId> {
+    return this.db.doc<Tournament>(`/tournaments/${tournamentId}`).snapshotChanges().pipe(
+      map(tournamentAction => {
+        if (!tournamentAction.payload.exists) {
+          return undefined;
+        }
+        return {
+          id: tournamentAction.payload.id,
+          name: tournamentAction.payload.data().name,
+          numberOfRounds: tournamentAction.payload.data().numberOfRounds,
+        };
+      })
+    );
+  }
+
+  getDefaultTournamentId(): Observable<string> {
+    return this.db.doc<GlobalSettings>('settings/globalSettings').valueChanges()
+      .pipe(
+        take(1),
+        map(settings => settings.defaultTournamentId)
+      );
+  }
+
+  removeTournament(tournamentId: string): Promise<void> {
+    return this.db.doc(`/tournaments/${tournamentId}`).delete();
+  }
+
+
+  makeTournamentDefault(tournamentId: string): Promise<void> {
+    return this.db.doc<GlobalSettings>('settings/globalSettings').update(<GlobalSettings>{
+      defaultTournamentId: tournamentId
+    });
   }
 
   getTeamScores(tournamentId: string): Observable<TeamScore[]> {

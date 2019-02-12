@@ -1,4 +1,5 @@
 <div *ngIf="afAuth.user | async as user; else showLogin">
+    <!-- <div > -->
   <mat-toolbar color="primary">
     <mat-toolbar-row>
       <span>PingisAppen</span>
@@ -18,14 +19,6 @@
     <button mat-menu-item (click)="addTournamentFromModal()">
       <mat-icon>add</mat-icon>
       <span>Lägg till ny turnering</span>
-    </button>
-    <button *ngIf="tournament$ | async as tournament" mat-menu-item (click)="removeTournament(tournament)">
-      <mat-icon>delete</mat-icon>
-      <span>Ta bort Turnering</span>
-    </button>
-    <button *ngIf="tournament$ | async as tournament" mat-menu-item (click)="makeTournamentDefault(tournament)">
-      <mat-icon>stars</mat-icon>
-      <span>Välj som default-turnering</span>
     </button>
     <button mat-menu-item (click)="logout()">
       <mat-icon>toggle_off</mat-icon>

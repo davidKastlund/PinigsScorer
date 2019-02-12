@@ -22,6 +22,8 @@ export class TournamentSettingsComponent implements OnInit {
   @Output() teamAdded = new EventEmitter<string>();
   @Output() tournamentNameChanged = new EventEmitter<string>();
   @Output() numberOfRoundsChanged = new EventEmitter<number>();
+  @Output() tournamentRemoved = new EventEmitter<void>();
+  @Output() tournamentIsDefault = new EventEmitter<void>();
 
   newTeamName: string;
 

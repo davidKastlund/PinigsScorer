@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>Logga in först</h1>
+<div mat-dialog-content>
+  <mat-form-field class="example-full-width">
+    <input matInput type="text" placeholder="Epost" [(ngModel)]="email" name="email" />
+  </mat-form-field>
+
+  <mat-form-field class="example-full-width">
+    <input matInput type="password" placeholder="Lösenord" [(ngModel)]="password" name="password" />
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button [mat-dialog-close]>Avbryt</button>
+  <button mat-button (click)="login()">Logga in</button>
+</div>

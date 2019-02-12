@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
 import { AngularFirestore } from '@angular/fire/firestore';
 
-import { map, tap, take } from 'rxjs/operators';
-import * as firebase from 'firebase/app';
+import { map, take, switchMap } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { BehaviorSubject } from 'rxjs';
 import { MatSnackBar, MatDialog } from '@angular/material';
@@ -11,8 +10,7 @@ import { Tournament } from './Tournament';
 import { TournamentWithId } from './TournamentWithId';
 import { GlobalSettings } from './GlobalSettings';
 import { CreateNewTournamtentComponent } from './create-new-tournamtent/create-new-tournamtent.component';
-import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
-import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
+import { TournamentDataService } from './tournament-data.service';
 
 @Component({
   selector: 'app-root',
@@ -21,59 +19,29 @@ import { ConfirmDialogData } from './confirm-dialog/ConfirmDialogData';
 })
 export class AppComponent implements OnInit {
 
-  title = 'gisysPingisApp';
-
   tournament$: Observable<TournamentWithId>;
   email: string;
   password: string;
   tournaments$: Observable<TournamentWithId[]>;
-  selectedTournamentId$ = new BehaviorSubject<string>('gazBtm1efiIZ91nL5ffk');
-  globalSettingsRef: firebase.firestore.DocumentReference;
+  selectedTournamentId$ = new BehaviorSubject<string>(undefined);
 
-  constructor(private db: AngularFirestore,
+  constructor(
+    private tournamentData: TournamentDataService,
     public afAuth: AngularFireAuth,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog) {
-
-    const tournamentsRef = db.collection<Tournament>('tournaments');
-
-    const globalSettings = db.collection<GlobalSettings>('settings').doc('globalSettings');
-    this.globalSettingsRef = globalSettings.ref;
-
-    globalSettings.valueChanges()
-      .pipe(take(1))
-      .subscribe((settings: GlobalSettings) => this.selectedTournamentId$.next(settings.defaultTournamentId));
-
-    this.tournaments$ = tournamentsRef.snapshotChanges()
-      .pipe(
-        map(actions => actions.map(t => (<TournamentWithId>{
-          id: t.payload.doc.id,
-          name: t.payload.doc.data().name
-        }))
-        )
-      );
-
-
-    this.selectedTournamentId$
-      .subscribe(tournamentId => {
-        if (!!tournamentId) {
-          this.tournament$ = db.doc<Tournament>(`/tournaments/${tournamentId}`).snapshotChanges().pipe(
-            map(action => {
-              if (!action.payload.exists) {
-                return null;
-              }
-              return {
-                id: action.payload.id,
-                name: action.payload.data().name,
-                numberOfRounds: action.payload.data().numberOfRounds,
-              };
-            })
-          );
-        }
-      });
-  }
+    private dialog: MatDialog,
+    ) {}
 
   ngOnInit(): void {
+
+    this.tournamentData.getDefaultTournamentId()
+      .subscribe(defaultId => this.selectedTournamentId$.next(defaultId));
+
+    this.tournaments$ = this.tournamentData.getTournaments();
+
+    this.tournament$ = this.selectedTournamentId$.pipe(
+      switchMap(tournamentId => this.tournamentData.getTournamentById(tournamentId))
+    );
   }
 
   addTournamentFromModal() {
@@ -83,9 +51,9 @@ export class AppComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(newTournamteName => {
       if (!!newTournamteName) {
-        this.db.collection<Tournament>('tournaments').add({ name: newTournamteName, numberOfRounds: 1 })
-          .then(ref => {
-            this.selectedTournamentId$.next(ref.id);
+        this.tournamentData.addNewTournament(newTournamteName)
+          .then(id => {
+            this.selectedTournamentId$.next(id);
             this.snackBar.open('Turneringen är tillagt!', null, {
               duration: 2000,
             });
@@ -94,32 +62,9 @@ export class AppComponent implements OnInit {
     });
   }
 
-  removeTournament(tournament: TournamentWithId) {
-    const data = (<ConfirmDialogData>{
-      title: 'Vill du ta bort turneringen?'
-    });
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, { width: '600px', data });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.selectedTournamentId$.next(undefined);
-        this.db.collection<Tournament>('tournaments').doc(tournament.id).delete();
-        this.snackBar.open('Turneringen är borttagen!', null, {
-          duration: 2000,
-        });
-      }
-    });
-  }
-
-  makeTournamentDefault(tournament: TournamentWithId) {
-    this.globalSettingsRef.update(<GlobalSettings>{ defaultTournamentId: tournament.id });
-    this.snackBar.open('Inställningen är sparad!', null, {
-      duration: 2000,
-    });
-  }
-
   login() {
-    this.afAuth.auth.signInWithEmailAndPassword(this.email, this.password);
+    this.afAuth.auth.signInWithEmailAndPassword(this.email, this.password)
+      .catch(reason => reason);
   }
   logout() {
     this.afAuth.auth.signOut();
