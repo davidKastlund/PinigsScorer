@@ -1,52 +1,35 @@
-<div *ngIf="afAuth.user | async as user; else showLogin">
-    <!-- <div > -->
-  <mat-toolbar color="primary">
-    <mat-toolbar-row>
-      <span>PingisAppen</span>
-      <button mat-button [matMenuTriggerFor]="tournamentMenu">Turneringar</button>
-      <span class="example-spacer"></span>
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-    </mat-toolbar-row>
-  </mat-toolbar>
-
-  <mat-menu #tournamentMenu="matMenu">
-    <button *ngFor="let t of tournaments$ | async" (click)="selectedTournamentId$.next(t.id)" mat-menu-item>{{t.name}}</button>
-  </mat-menu>
-
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="addTournamentFromModal()">
-      <mat-icon>add</mat-icon>
-      <span>Lägg till ny turnering</span>
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span>PingisAppen</span>
+    <button mat-button [matMenuTriggerFor]="tournamentMenu">Turneringar</button>
+    <span class="example-spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>more_vert</mat-icon>
     </button>
-    <button mat-menu-item (click)="logout()">
-      <mat-icon>toggle_off</mat-icon>
-      <span>Logga ut</span>
-    </button>
-  </mat-menu>
-
-  <div *ngIf="tournament$ | async as tournament">
-    <app-tournament-detail [tournament]="tournament"></app-tournament-detail>
-  </div>
+  </mat-toolbar-row>
+</mat-toolbar>
+<div *ngIf="tournament$ | async as tournament">
+  <app-tournament-detail [tournament]="tournament"></app-tournament-detail>
 </div>
 
-<ng-template #showLogin>
-  <div class="login-container">
-    <h1>PingisAppen</h1>
-    <mat-card>
-      <mat-card-content>
-          <mat-form-field class="example-full-width">
-            <input matInput type="text" placeholder="Epost" [(ngModel)]="email" name="email" />
-          </mat-form-field>
-    
-          <mat-form-field class="example-full-width">
-            <input matInput type="password" placeholder="Lösenord" [(ngModel)]="password" name="password" />
-          </mat-form-field>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button (click)="login()">logga in</button>
-        </mat-card-actions>
-    </mat-card>
-  </div>
-</ng-template>
+
+<mat-menu #tournamentMenu="matMenu">
+  <button *ngFor="let t of tournaments$ | async" (click)="selectedTournamentId$.next(t.id)" mat-menu-item>
+    {{t.name}}
+  </button>
+</mat-menu>
+
+<mat-menu #menu="matMenu">
+  <button mat-menu-item (click)="addTournamentFromModal()">
+    <mat-icon>add</mat-icon>
+    <span>Lägg till ny turnering</span>
+  </button>
+  <button *ngIf="isLoggedIn$ | async" mat-menu-item (click)="logout()">
+    <mat-icon>toggle_off</mat-icon>
+    <span>Logga ut</span>
+  </button>
+  <button *ngIf="!(isLoggedIn$ | async)" mat-menu-item (click)="loginWithDialog()">
+    <mat-icon>toggle_on</mat-icon>
+    <span>Logga in</span>
+  </button>
+</mat-menu>

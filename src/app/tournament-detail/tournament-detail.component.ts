@@ -9,7 +9,6 @@ import { EditTeamDto } from '../edit-team-dialog/EditTeamDto';
 import { map } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogData } from '../confirm-dialog/ConfirmDialogData';
-import { Tournament } from '../Tournament';
 import { MatDialog, MatSnackBar } from '@angular/material';
 
 @Component({
@@ -63,7 +62,7 @@ export class TournamentDetailComponent implements OnInit, OnChanges {
   }
 
   private stringContains(str: string, compareStr: string): boolean {
-    return str && str.toLocaleLowerCase().includes(compareStr);
+    return !compareStr || str && str.toLowerCase().includes(compareStr.toLowerCase());
   }
 
   removeMatch(matchId: string) {

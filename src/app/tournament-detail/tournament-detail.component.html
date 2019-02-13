@@ -6,19 +6,18 @@
       </app-score-table>
     </mat-tab>
     <mat-tab label="Matcher">
-      <app-game-list [matchesToPlay]="matchesToPlayFiltered$ | async" (filterChanged)="matchesToPlayFilter$.next($event)"
-        (matchRemoved)="removeMatch($event)" (matchAdded)="addMatch($event)">
+      <app-game-list [matchesToPlay]="matchesToPlayFiltered$ | async"
+        (filterChanged)="matchesToPlayFilter$.next($event)" 
+        (matchRemoved)="removeMatch($event)"
+        (matchAdded)="addMatch($event)">
       </app-game-list>
     </mat-tab>
     <mat-tab label="Inställningar">
-      <app-tournament-settings [teams]="pointSummary$ | async" [tournamentName]="tournament.name" [numberOfRounds]="tournament.numberOfRounds"
-        (teamEdited)="onTeamEdited($event)" 
-        (teamRemoved)="removeTeam($event)" 
-        (teamAdded)="onTeamAdded($event)"
-        (tournamentNameChanged)="changeNameOfTournament($event)" 
-        (numberOfRoundsChanged)="changeNumberOfRounds($event)"
-        (tournamentRemoved)="removeTournament()"
-        (tournamentIsDefault)="makeTournamentDefault()">
+      <app-tournament-settings [teams]="pointSummary$ | async" [tournamentName]="tournament.name"
+        [numberOfRounds]="tournament.numberOfRounds" (teamEdited)="onTeamEdited($event)"
+        (teamRemoved)="removeTeam($event)" (teamAdded)="onTeamAdded($event)"
+        (tournamentNameChanged)="changeNameOfTournament($event)" (numberOfRoundsChanged)="changeNumberOfRounds($event)"
+        (tournamentRemoved)="removeTournament()" (tournamentIsDefault)="makeTournamentDefault()">
       </app-tournament-settings>
     </mat-tab>
   </mat-tab-group>

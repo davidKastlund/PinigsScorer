@@ -37,40 +37,36 @@ export class TournamentDataService {
     });
   }
 
-  private getCanEdit(): Promise<firebase.User> {
+  getCanEdit(): Promise<boolean> {
     return this.afAuth.user.pipe(take(1))
       .toPromise()
       .then(existingUser => {
         if (!!existingUser) {
-          return existingUser;
+          return true;
         }
         return this.dialog.open(LoginDialogComponent).afterClosed().toPromise()
-          .then(user => {
-            if (user) {
-              return user;
-            } else {
-              return Promise.reject('Nånting gick fel när du skulle logga in!');
-            }
-          });
+        .then(user => !!user);
       });
   }
 
   async addMatch(addedMatch: AddedMatchDto, tournamentId: string) {
-    await this.getCanEdit()
-    const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+    if (await this.getCanEdit()) {
 
-    const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
-    const newMatch: MatchInFireStore = {
-      date: timestamp,
-      team1: tournament.collection('teams').doc(addedMatch.team1Id).ref,
-      team2: tournament.collection('teams').doc(addedMatch.team2Id).ref,
-      team1Score: addedMatch.team1Score,
-      team2Score: addedMatch.team2Score
-    };
-    tournament.collection('matches').add(newMatch);
-    this.snackBar.open('Matchen är tillagd!', null, {
-      duration: 2000,
-    });
+      const tournament = this.db.doc<Tournament>(`/tournaments/${tournamentId}`);
+
+      const timestamp = firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp;
+      const newMatch: MatchInFireStore = {
+        date: timestamp,
+        team1: tournament.collection('teams').doc(addedMatch.team1Id).ref,
+        team2: tournament.collection('teams').doc(addedMatch.team2Id).ref,
+        team1Score: addedMatch.team1Score,
+        team2Score: addedMatch.team2Score
+      };
+      tournament.collection('matches').add(newMatch);
+      this.snackBar.open('Matchen är tillagd!', null, {
+        duration: 2000,
+      });
+    }
 
   }
 
