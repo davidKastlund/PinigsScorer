@@ -1,13 +1,24 @@
-<h1 mat-dialog-title>Lägg till match</h1>
-<div mat-dialog-content>
-  <mat-form-field class="example-full-width">
-    <input matInput placeholder="Poäng för: {{data.team1Name}}" type="number" [(ngModel)]="team1Score" name="team1Score" />
-  </mat-form-field>
-  <mat-form-field class="example-full-width">
-    <input matInput placeholder="Poäng för: {{data.team2Name}}" type="number" [(ngModel)]="team2Score" name="team2Score" />
-  </mat-form-field>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="cancel()">Avbryt</button>
-  <button mat-button (click)="close()">Spara</button>
-</div>
+<form [formGroup]="myForm">
+  <h1 mat-dialog-title>Lägg till match</h1>
+  <div mat-dialog-content>
+    <mat-form-field class="example-full-width">
+      <input matInput required placeholder="Poäng till {{data.team1Name}}" type="number" formControlName="team1Score" />
+      <mat-error>
+        {{team1ScoreErrors}}
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="example-full-width">
+      <input matInput required placeholder="Poäng till {{data.team2Name}}" type="number" formControlName="team2Score" />
+      <mat-error>
+        {{team2ScoreErrors}}
+      </mat-error>
+    </mat-form-field>
+    <mat-error *ngIf="showPingisRuleErrorMessage">
+      Nån måste ha minst 11 poäng och vinna med 2
+    </mat-error>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">Avbryt</button>
+    <button mat-button [disabled]="myForm.invalid" (click)="close()">Spara</button>
+  </div>
+</form>

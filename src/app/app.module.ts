@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AngularFireModule } from '@angular/fire';
@@ -33,7 +33,7 @@ import { LoginDialogComponent } from './login-dialog/login-dialog.component';
     GameListComponent,
     TournamentSettingsComponent,
     TournamentDetailComponent,
-    LoginDialogComponent
+    LoginDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,7 +44,9 @@ import { LoginDialogComponent } from './login-dialog/login-dialog.component';
     AngularFireAuthModule, // imports firebase/auth, only needed for auth features,
     AngularFireStorageModule, // imports firebase/storage only needed for storage features
     BrowserAnimationsModule,
-    CustomMaterialModuleModule
+    CustomMaterialModuleModule,
+    ReactiveFormsModule,
+    BrowserAnimationsModule,
   ],
   entryComponents: [
     CreateNewTournamtentComponent,
