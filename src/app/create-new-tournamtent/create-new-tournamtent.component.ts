@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialogRef } from '@angular/material';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-create-new-tournamtent',
@@ -8,19 +9,25 @@ import { MatDialogRef } from '@angular/material';
 })
 export class CreateNewTournamtentComponent implements OnInit {
 
-  name: string;
-
-  constructor(public dialogRef: MatDialogRef<CreateNewTournamtentComponent>) { }
+  myForm: FormGroup;
+  constructor(public dialogRef: MatDialogRef<CreateNewTournamtentComponent>,
+    private fb: FormBuilder) { }
 
   ngOnInit() {
+    this.myForm = this.fb.group({
+      name: ['', [Validators.required]]
+    });
   }
 
   cancelDialog() {
     this.dialogRef.close();
   }
 
-  closeDialog() {
-    this.dialogRef.close(this.name);
+  get name() {
+    return this.myForm.get('name');
   }
 
+  closeDialog() {
+    this.dialogRef.close(this.name.value);
+  }
 }

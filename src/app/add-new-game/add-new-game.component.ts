@@ -20,16 +20,16 @@ export class AddNewGameComponent implements OnInit {
     this.myForm = this.fb.group({
       team1Score: [undefined, [
         Validators.required,
-        Validators.pattern("^[0-9]*$"),
+        Validators.pattern('^[0-9]*$'),
       ]],
       team2Score: [undefined, [
         Validators.required,
-        Validators.pattern("^[0-9]*$"),
+        Validators.pattern('^[0-9]*$'),
       ]
       ],
-    }, { validator: this.mustWinWithTwo("team1Score", "team2Score") });
+    }, { validator: this.mustWinWithTwo('team1Score', 'team2Score') });
 
-    this.myForm.valueChanges.subscribe(v => console.log(v))
+    this.myForm.valueChanges.subscribe(v => console.log(v));
   }
 
   mustWinWithTwo(score1Key: string, score2Key: string): ValidatorFn {
@@ -47,27 +47,32 @@ export class AddNewGameComponent implements OnInit {
   }
 
   get showPingisRuleErrorMessage() {
-    return this.team1Score.touched && this.team1Score.valid && this.team2Score.touched && this.team2Score.valid && this.myForm.errors && this.myForm.errors.mustWinWithTwo;
+    return this.team1Score.touched &&
+      this.team1Score.valid &&
+      this.team2Score.touched &&
+      this.team2Score.valid &&
+      this.myForm.errors &&
+      this.myForm.errors.mustWinWithTwo;
   }
 
   get team1Score() {
-    return this.myForm.get("team1Score");
+    return this.myForm.get('team1Score');
   }
 
   private getErrorsFromFormControl(formControl: AbstractControl) {
     const errors = formControl.errors || {};
     return Object.keys(errors).map(e => {
       switch (e) {
-        case "min":
-          return `Får inte vara mindre än ${errors[e].min}`
-        case "required":
-          return "Får inte vara tomt";
-        case "pattern":
-          return "Måste vara ett positivt heltal";
+        case 'min':
+          return `Får inte vara mindre än ${errors[e].min}`;
+        case 'required':
+          return 'Får inte vara tomt';
+        case 'pattern':
+          return 'Måste vara ett positivt heltal';
         default:
-          return "Nått är fel"
+          return 'Nått är fel';
       }
-    }).join(", ");
+    }).join(', ');
   }
 
   get team1ScoreErrors() {
@@ -75,7 +80,7 @@ export class AddNewGameComponent implements OnInit {
   }
 
   get team2Score() {
-    return this.myForm.get("team2Score");
+    return this.myForm.get('team2Score');
   }
 
   get team2ScoreErrors() {

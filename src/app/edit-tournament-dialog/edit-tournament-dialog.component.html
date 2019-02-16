@@ -1,0 +1,18 @@
+<form [formGroup]="myForm">
+    <h1 mat-dialog-title>Redigera turnering</h1>
+    <div mat-dialog-content>
+      <mat-form-field class="example-full-width">
+        <input matInput required placeholder="Namn" type="text" required formControlName="name" />
+      </mat-form-field>
+      <mat-form-field class="example-full-width">
+        <input matInput required placeholder="Antal interna möten" type="number" formControlName="numberOfRounds" />
+        <mat-error>
+          {{numberErrorString}}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions>
+      <button mat-button (click)="cancel()">Avbryt</button>
+      <button mat-button [disabled]="myForm.invalid" (click)="close()">Spara</button>
+    </div>
+  </form>

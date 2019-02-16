@@ -1,10 +1,12 @@
-<h1 mat-dialog-title>Lägg till ny turnering</h1>
-<div mat-dialog-content>
-  <mat-form-field>
-    <input matInput type="text" placeholder="Namn på ny turnering" [(ngModel)]="name" name="name" />
-  </mat-form-field>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="cancelDialog()">Avbryt</button>
-  <button mat-button (click)="closeDialog()">Spara</button>
-</div>
+<form [formGroup]="myForm">
+  <h1 mat-dialog-title>Lägg till ny turnering</h1>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <input matInput type="text" required placeholder="Namn på ny turnering" formControlName="name" />
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancelDialog()">Avbryt</button>
+    <button mat-button [disabled]="myForm.invalid" (click)="closeDialog()">Spara</button>
+  </div>
+</form>

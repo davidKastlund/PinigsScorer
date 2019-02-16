@@ -1,10 +1,10 @@
 <h1 mat-dialog-title>Redigera lag</h1>
 <div mat-dialog-content>
   <mat-form-field>
-    <input matInput placeholder="Lagnamn" [(ngModel)]="data.name">
+    <input matInput placeholder="Lagnamn" required [(ngModel)]="data.name" name="name" #name="ngModel">
   </mat-form-field>
 </div>
 <mat-dialog-actions align="end">
   <button mat-button [mat-dialog-close]>Avbryt</button>
-  <button mat-button (click)="onSave()">Spara</button>
+  <button mat-button [disabled]="name.invalid" (click)="onSave()">Spara</button>
 </mat-dialog-actions>

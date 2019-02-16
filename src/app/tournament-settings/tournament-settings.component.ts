@@ -9,6 +9,8 @@ import { TournamentDataService } from '../tournament-data.service';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { EditTournamentDialogComponent } from '../edit-tournament-dialog/edit-tournament-dialog.component';
+import { Tournament } from '../Tournament';
 
 @Component({
   selector: 'app-tournament-settings',
@@ -74,6 +76,27 @@ export class TournamentSettingsComponent implements OnInit {
     }
   }
 
+  async editTournament() {
+    if (await this.tournamentData.getCanEdit()) {
+      const data: Tournament = {
+        name: this.tournamentName,
+        numberOfRounds: this.numberOfRounds
+      };
+      const dialogRef = this.dialog.open(EditTournamentDialogComponent, { width: '600px', data });
+
+      dialogRef.afterClosed().toPromise().then((result: Tournament) => {
+        if (result) {
+          if (data.name !== result.name) {
+            this.tournamentNameChanged.emit(result.name);
+          }
+          if (data.numberOfRounds !== result.numberOfRounds) {
+            this.numberOfRoundsChanged.emit(result.numberOfRounds);
+          }
+        }
+      });
+    }
+  }
+
   async addTeam() {
     if (await this.tournamentData.getCanEdit()) {
 
@@ -84,22 +107,6 @@ export class TournamentSettingsComponent implements OnInit {
         this.snackBar.open('Laget måste ha ett namn!', null, {
           duration: 2000,
         });
-      }
-    }
-  }
-
-  async onTournamentNameChanged(name: string) {
-    if (!!name) {
-      if (await this.tournamentData.getCanEdit()) {
-        this.tournamentNameChanged.emit(name);
-      }
-    }
-  }
-
-  async onNumberOfRoundsChanged(numberOfRounds: number) {
-    if (numberOfRounds > 0 && numberOfRounds < 6) {
-      if (await this.tournamentData.getCanEdit()) {
-        this.numberOfRoundsChanged.emit(numberOfRounds);
       }
     }
   }
