@@ -180,7 +180,7 @@ export class TournamentDataService {
   }
 
   getTournaments(): Observable<TournamentWithId[]> {
-    return this.db.collection<Tournament>('tournaments').snapshotChanges()
+    return this.db.collection<Tournament>('tournaments', ref => ref.orderBy('name')).snapshotChanges()
       .pipe(
         map(actions => actions.map(t => (<TournamentWithId>{
           id: t.payload.doc.id,

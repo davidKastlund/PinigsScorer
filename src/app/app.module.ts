@@ -21,6 +21,7 @@ import { TournamentSettingsComponent } from './tournament-settings/tournament-se
 import { TournamentDetailComponent } from './tournament-detail/tournament-detail.component';
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { EditTournamentDialogComponent } from './edit-tournament-dialog/edit-tournament-dialog.component';
+import { SidenavComponent } from './sidenav/sidenav.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { EditTournamentDialogComponent } from './edit-tournament-dialog/edit-tou
     TournamentDetailComponent,
     LoginDialogComponent,
     EditTournamentDialogComponent,
+    SidenavComponent,
   ],
   imports: [
     BrowserModule,
