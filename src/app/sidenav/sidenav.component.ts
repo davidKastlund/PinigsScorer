@@ -34,7 +34,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
     private dialog: MatDialog, ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this._mobileQueryListener = () => changeDetectorRef.detectChanges();
-    this.mobileQuery.addEventListener('change' , this._mobileQueryListener);
+    this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
 
@@ -51,7 +51,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
-    this.mobileQuery.removeEventListener('change' , this._mobileQueryListener);
+    this.mobileQuery.removeListener(this._mobileQueryListener);
   }
 
   async addTournamentFromModal() {
