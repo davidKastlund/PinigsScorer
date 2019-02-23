@@ -13,7 +13,8 @@
     <mat-sidenav #snav [mode]="mobileQuery.matches ? 'over' : 'side'" [fixedInViewport]="mobileQuery.matches"
       fixedTopGap="56">
       <mat-nav-list>
-        <a mat-list-item *ngFor="let t of tournaments$ | async" (click)="selectTournament(t.id)">
+        <a mat-list-item [ngClass]="{'mat-list-item-focus': (selectedTournamentId$ | async) === t.id}"
+          *ngFor="let t of tournaments$ | async" (click)="selectTournament(t.id)">
           {{t.name}}
         </a>
       </mat-nav-list>
