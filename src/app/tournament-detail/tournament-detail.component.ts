@@ -1,6 +1,6 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { TournamentWithId } from '../TournamentWithId';
-import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import { TeamScore } from '../TeamScore';
 import { TournamentDataService } from '../tournament-data.service';
 import { Match } from '../Match';
@@ -10,55 +10,61 @@ import { map } from 'rxjs/operators';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogData } from '../confirm-dialog/ConfirmDialogData';
 import { MatDialog, MatSnackBar } from '@angular/material';
+import { Store, select } from '@ngrx/store';
+import { State } from './../reducers/index';
+import { getMatchesToPlayState, getTeamScoresState } from '../reducers/tournament.reducer';
 
 @Component({
   selector: 'app-tournament-detail',
   templateUrl: './tournament-detail.component.html',
   styleUrls: ['./tournament-detail.component.scss']
 })
-export class TournamentDetailComponent implements OnInit, OnChanges {
+export class TournamentDetailComponent implements OnInit, OnDestroy {
+
 
   @Input() tournament: TournamentWithId;
   pointSummary$: Observable<TeamScore[]>;
   matchesToPlayFiltered$: Observable<Match[]>;
   matchesToPlayFilter$ = new BehaviorSubject<string>(undefined);
+  seletedTournamentIdSubscription: Subscription;
 
   constructor(private tournamentData: TournamentDataService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar) { }
-
-  ngOnInit() {
+    private snackBar: MatSnackBar,
+    private store: Store<State>) {
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.tournament) {
-      const tournamentId = changes.tournament.currentValue.id;
-      if (!!tournamentId) {
-        this.pointSummary$ = this.tournamentData.getTeamScores(tournamentId)
-          .pipe(
-            map(teamScores => teamScores.sort((a: TeamScore, b: TeamScore) => {
-              const scoreDiff = b.score - a.score;
-              if (scoreDiff !== 0) {
-                return scoreDiff;
-              }
-              const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
-              if (matchDiff !== 0) {
-                return matchDiff;
-              }
-              return b.ballDifference - a.ballDifference;
-            }))
-          );
-        const matchesToPlay$ = this.tournamentData.getMatchesToPlayByTournamentId(tournamentId);
-        this.matchesToPlayFiltered$ = combineLatest(matchesToPlay$, this.matchesToPlayFilter$)
-          .pipe(
-            map(([matches, filter]) => matches
-              .filter(m => !filter ||
-                this.stringContains(m.team1.name, filter) ||
-                this.stringContains(m.team2.name, filter))
-            )
-          );
-      }
-    }
+  ngOnInit() {
+
+    const matchesToPlay$ = this.store.pipe(select(getMatchesToPlayState));
+
+    this.matchesToPlayFiltered$ = combineLatest(matchesToPlay$, this.matchesToPlayFilter$)
+      .pipe(
+        map(([matches, filter]) => matches
+          .filter(m => !filter ||
+            this.stringContains(m.team1.name, filter) ||
+            this.stringContains(m.team2.name, filter))
+        )
+      );
+
+    this.pointSummary$ = this.store.pipe(select(getTeamScoresState))
+      .pipe(
+        map(teamScores => teamScores.sort((a: TeamScore, b: TeamScore) => {
+          const scoreDiff = b.score - a.score;
+          if (scoreDiff !== 0) {
+            return scoreDiff;
+          }
+          const matchDiff = a.playedMatchesCount - b.playedMatchesCount;
+          if (matchDiff !== 0) {
+            return matchDiff;
+          }
+          return b.ballDifference - a.ballDifference;
+        }))
+      );
+  }
+
+  ngOnDestroy(): void {
+    this.seletedTournamentIdSubscription.unsubscribe();
   }
 
   private stringContains(str: string, compareStr: string): boolean {

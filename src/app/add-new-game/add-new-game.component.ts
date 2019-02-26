@@ -28,8 +28,6 @@ export class AddNewGameComponent implements OnInit {
       ]
       ],
     }, { validator: this.mustWinWithTwo('team1Score', 'team2Score') });
-
-    this.myForm.valueChanges.subscribe(v => console.log(v));
   }
 
   mustWinWithTwo(score1Key: string, score2Key: string): ValidatorFn {

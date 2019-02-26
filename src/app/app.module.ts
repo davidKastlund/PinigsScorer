@@ -22,6 +22,11 @@ import { TournamentDetailComponent } from './tournament-detail/tournament-detail
 import { LoginDialogComponent } from './login-dialog/login-dialog.component';
 import { EditTournamentDialogComponent } from './edit-tournament-dialog/edit-tournament-dialog.component';
 import { SidenavComponent } from './sidenav/sidenav.component';
+import { StoreModule } from '@ngrx/store';
+import { reducers, metaReducers } from './reducers';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { TournamentEffects } from './tournament.effects';
 
 @NgModule({
   declarations: [
@@ -51,6 +56,13 @@ import { SidenavComponent } from './sidenav/sidenav.component';
     CustomMaterialModuleModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
+    StoreModule.forRoot(reducers, { metaReducers }),
+    EffectsModule.forRoot([TournamentEffects]),
+    StoreDevtoolsModule.instrument({
+      name: 'pingisApp demo app devtools',
+      maxAge: 25,
+      logOnly: environment.production
+    })
   ],
   entryComponents: [
     CreateNewTournamtentComponent,

@@ -1,12 +1,16 @@
-import {MediaMatcher} from '@angular/cdk/layout';
-import {ChangeDetectorRef, Component, OnDestroy, ViewChild, OnInit} from '@angular/core';
+import { MediaMatcher } from '@angular/cdk/layout';
+import { ChangeDetectorRef, Component, OnDestroy, ViewChild, OnInit } from '@angular/core';
 import { TournamentWithId } from '../TournamentWithId';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { TournamentDataService } from '../tournament-data.service';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { MatSnackBar, MatDialog, MatSidenav } from '@angular/material';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map, tap } from 'rxjs/operators';
 import { CreateNewTournamtentComponent } from '../create-new-tournamtent/create-new-tournamtent.component';
+import { Store, select } from '@ngrx/store';
+import { State } from '../reducers';
+import { SetSelectTournamentId, LoadTournaments } from '../actions/tournament.actions';
+import { getSelectedTournament, getAllTournaments, getLoadTournamentsErrorMessage } from '../reducers/tournament.reducer';
 
 /** @title Responsive sidenav */
 @Component({
@@ -19,19 +23,22 @@ export class SidenavComponent implements OnDestroy, OnInit {
 
   tournament$: Observable<TournamentWithId>;
   tournaments$: Observable<TournamentWithId[]>;
-  selectedTournamentId$ = new BehaviorSubject<string>(undefined);
   isLoggedIn$: Observable<boolean>;
 
   @ViewChild('snav') sidenav: MatSidenav;
 
   private _mobileQueryListener: () => void;
+  getTournamentsSubscription: Subscription;
+  errorMessage$: Observable<string>;
 
   constructor(changeDetectorRef: ChangeDetectorRef,
     media: MediaMatcher,
     private tournamentData: TournamentDataService,
     private afAuth: AngularFireAuth,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog, ) {
+    private dialog: MatDialog,
+    private store: Store<State>,
+  ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this._mobileQueryListener = () => changeDetectorRef.detectChanges();
     this.mobileQuery.addListener(this._mobileQueryListener);
@@ -41,17 +48,22 @@ export class SidenavComponent implements OnDestroy, OnInit {
   ngOnInit(): void {
     this.isLoggedIn$ = this.afAuth.user.pipe(map(u => !!u));
     this.tournamentData.getDefaultTournamentId()
-      .subscribe(defaultId => this.selectedTournamentId$.next(defaultId));
+      .subscribe(defaultId => {
+        this.store.dispatch(new SetSelectTournamentId(defaultId))
+      });
 
-    this.tournaments$ = this.tournamentData.getTournaments();
+    this.store.dispatch(new LoadTournaments());
 
-    this.tournament$ = this.selectedTournamentId$.pipe(
-      switchMap(tournamentId => this.tournamentData.getTournamentById(tournamentId))
-    );
+    this.errorMessage$ = this.store.pipe(select(getLoadTournamentsErrorMessage));
+
+    this.tournaments$ = this.store.pipe(select(getAllTournaments));
+
+    this.tournament$ = this.store.pipe(select(getSelectedTournament));
   }
 
   ngOnDestroy(): void {
     this.mobileQuery.removeListener(this._mobileQueryListener);
+    this.getTournamentsSubscription.unsubscribe();
   }
 
   async addTournamentFromModal() {
@@ -64,7 +76,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
         if (!!newTournamteName) {
           this.tournamentData.addNewTournament(newTournamteName)
             .then(id => {
-              this.selectedTournamentId$.next(id);
+              this.store.dispatch(new SetSelectTournamentId(id))
               this.snackBar.open('Turneringen är tillagt!', null, {
                 duration: 2000,
               });
@@ -78,7 +90,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
     if (this.mobileQuery.matches) {
       this.sidenav.close();
     }
-    this.selectedTournamentId$.next(id);
+    this.store.dispatch(new SetSelectTournamentId(id))
   }
 
   loginWithDialog() {
