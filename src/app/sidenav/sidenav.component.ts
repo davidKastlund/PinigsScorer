@@ -41,6 +41,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
   ) {
     this.mobileQuery = media.matchMedia('(max-width: 600px)');
     this._mobileQueryListener = () => changeDetectorRef.detectChanges();
+// tslint:disable-next-line: deprecation
     this.mobileQuery.addListener(this._mobileQueryListener);
   }
 
@@ -62,6 +63,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+// tslint:disable-next-line: deprecation
     this.mobileQuery.removeListener(this._mobileQueryListener);
     this.getTournamentsSubscription.unsubscribe();
   }
