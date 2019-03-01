@@ -83,8 +83,6 @@ export class TournamentDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Testing
-
   onTeamAdded(teamName: string) {
     this.tournamentData.addTeam(teamName, this.tournament.id);
   }
