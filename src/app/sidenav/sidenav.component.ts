@@ -49,7 +49,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
     this.isLoggedIn$ = this.afAuth.user.pipe(map(u => !!u));
     this.tournamentData.getDefaultTournamentId()
       .subscribe(defaultId => {
-        this.store.dispatch(new SetSelectTournamentId(defaultId))
+        this.store.dispatch(new SetSelectTournamentId(defaultId));
       });
 
     this.store.dispatch(new LoadTournaments());
@@ -76,7 +76,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
         if (!!newTournamteName) {
           this.tournamentData.addNewTournament(newTournamteName)
             .then(id => {
-              this.store.dispatch(new SetSelectTournamentId(id))
+              this.store.dispatch(new SetSelectTournamentId(id));
               this.snackBar.open('Turneringen är tillagt!', null, {
                 duration: 2000,
               });
@@ -90,7 +90,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
     if (this.mobileQuery.matches) {
       this.sidenav.close();
     }
-    this.store.dispatch(new SetSelectTournamentId(id))
+    this.store.dispatch(new SetSelectTournamentId(id));
   }
 
   loginWithDialog() {

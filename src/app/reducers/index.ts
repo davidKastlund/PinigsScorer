@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 import * as tournamentReducer from './tournament.reducer';
 
 export interface State {
-  tournaments: tournamentReducer.TournamentState
+  tournaments: tournamentReducer.TournamentState;
 }
 
 export const reducers: ActionReducerMap<State> = {

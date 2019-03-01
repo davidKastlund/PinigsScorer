@@ -34,7 +34,7 @@ export class TeamScoreHelperService {
   }
 
 
-  getMatchesToPlay(matches: MatchWithId[], teams: TeamId[], numberOfRounds: number): Match[]{
+  getMatchesToPlay(matches: MatchWithId[], teams: TeamId[], numberOfRounds: number): Match[] {
     const allMatchesToPlay = this.getAllMatchesToPlayNew(teams, numberOfRounds);
         const playedMatches = this.getPlayedMatchesNew(matches, teams);
 

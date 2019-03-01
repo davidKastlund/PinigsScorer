@@ -7,7 +7,7 @@
     </mat-tab>
     <mat-tab label="Matcher">
       <app-game-list [matchesToPlay]="matchesToPlayFiltered$ | async"
-        (filterChanged)="matchesToPlayFilter$.next($event)" 
+        (filterChanged)="matchesToPlayFilter$.next($event)"
         (matchRemoved)="removeMatch($event)"
         (matchAdded)="addMatch($event)">
       </app-game-list>

@@ -7,12 +7,12 @@ import { CombinationHelperService } from './../combination-helper.service';
 import { TeamScoreHelperService } from '../team-score-helper.service';
 
 export interface TournamentState {
-    tournaments: TournamentWithId[],
-    selectedTournamentId: string | null,
-    loadTournamentsErrorMessage: string,
-    matches: MatchWithId[],
-    teams: TeamId[]
-};
+    tournaments: TournamentWithId[];
+    selectedTournamentId: string | null;
+    loadTournamentsErrorMessage: string;
+    matches: MatchWithId[];
+    teams: TeamId[];
+}
 
 const initialState: TournamentState = {
     tournaments: [],
@@ -22,7 +22,7 @@ const initialState: TournamentState = {
     teams: []
 };
 
-const getTournamentFeatureState = createFeatureSelector<TournamentState>("tournaments");
+const getTournamentFeatureState = createFeatureSelector<TournamentState>('tournaments');
 export const getAllTournaments = createSelector(
     getTournamentFeatureState,
     state => state.tournaments);
@@ -39,43 +39,43 @@ export const getSelectedTournamentId = createSelector(
 export const getSelectedTournament = createSelector(
     getTournamentFeatureState,
     getSelectedTournamentId,
-    (state, selectedTournamentId) => state.tournaments.find(t => t.id == selectedTournamentId));
+    (state, selectedTournamentId) => state.tournaments.find(t => t.id === selectedTournamentId));
 
 const getMatches = createSelector(
     getTournamentFeatureState,
     state => state.matches
-)
+);
 
 
 export const getTeams = createSelector(
     getTournamentFeatureState,
     state => state.teams
-)
+);
 
 
 const getNumberOfRounds = createSelector(
     getSelectedTournament,
-    t => t.numberOfRounds 
-)
+    t => t.numberOfRounds
+);
 
 export const getMatchesToPlayState = createSelector(
     getMatches,
     getTeams,
     getNumberOfRounds,
     (matches, teams, numberOfRound) => {
-        let helper = new TeamScoreHelperService(new CombinationHelperService());
-        return helper.getMatchesToPlay(matches, teams, numberOfRound); 
+        const helper = new TeamScoreHelperService(new CombinationHelperService());
+        return helper.getMatchesToPlay(matches, teams, numberOfRound);
     }
-)
+);
 
 export const getTeamScoresState = createSelector(
     getMatchesToPlayState,
     getTeams,
     (matchesToPlay, teams) => {
-        let helper = new TeamScoreHelperService(new CombinationHelperService());
+        const helper = new TeamScoreHelperService(new CombinationHelperService());
         return helper.getTeamScores(matchesToPlay, teams);
     }
-)
+);
 
 
 function insertItem(array, item, index) {
@@ -83,11 +83,11 @@ function insertItem(array, item, index) {
         ...array.slice(0, index),
         item,
         ...array.slice(index)
-    ]
+    ];
 }
 
 function removeItem(array, index) {
-    return [...array.slice(0, index), ...array.slice(index + 1)]
+    return [...array.slice(0, index), ...array.slice(index + 1)];
 }
 
 export function reducer(state = initialState, action: TournamentActions.TournamentActions): TournamentState {
@@ -104,7 +104,7 @@ export function reducer(state = initialState, action: TournamentActions.Tourname
                 ...state,
                 tournaments: action.payload,
                 loadTournamentsErrorMessage: ''
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.AddTournament: {
@@ -112,7 +112,7 @@ export function reducer(state = initialState, action: TournamentActions.Tourname
                 ...state,
                 tournaments: insertItem(state.tournaments, action.payload.tournament, action.payload.index),
                 loadTournamentsErrorMessage: ''
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.RemoveTournament: {
@@ -120,39 +120,39 @@ export function reducer(state = initialState, action: TournamentActions.Tourname
                 ...state,
                 tournaments: removeItem(state.tournaments, action.payload),
                 loadTournamentsErrorMessage: ''
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.ModifyTournament: {
             return {
                 ...state,
                 tournaments: insertItem(
-                    removeItem(state.tournaments, action.payload.oldIndex), 
-                    action.payload.tournament, 
+                    removeItem(state.tournaments, action.payload.oldIndex),
+                    action.payload.tournament,
                     action.payload.newIndex),
                 loadTournamentsErrorMessage: ''
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.SetMatches: {
             return {
                 ...state,
                 matches: action.payload
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.SetTeams: {
             return {
                 ...state,
                 teams: action.payload
-            }
+            };
         }
 
         case TournamentActions.TournamentActionTypes.LoadFail: {
             return {
                 ...state,
                 loadTournamentsErrorMessage: action.payload
-            }
+            };
         }
 
         default: {

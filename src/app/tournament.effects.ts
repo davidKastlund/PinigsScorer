@@ -40,37 +40,15 @@ export class TournamentEffects {
             ))
     );
 
-    private getMatches(tournamentId: string): Observable<MatchWithId[]> {
-        return this.db.doc<Tournament>(`/tournaments/${tournamentId}`)
-            .collection<MatchInFireStore>('matches').snapshotChanges().pipe(
-                map(actions => actions.map(a => {
-                    const data = a.payload.doc.data();
-                    return {
-                        id: a.payload.doc.id,
-                        date: data.date && data.date.toDate(),
-                        team1Id: data.team1.id,
-                        team2Id: data.team2.id,
-                        team1Score: data.team1Score,
-                        team2Score: data.team2Score
-                    }
-                }))
-            );
-    }
-
-    private getTeams(tournamentId: string): Observable<DocumentChangeAction<Team>[]> {
-        return this.db.doc<Tournament>(`/tournaments/${tournamentId}`)
-            .collection<Team>('teams').snapshotChanges();
-    }
-
     @Effect() loadTournaments$: Observable<Action> = this.actions$.pipe(
         ofType(tournamentActions.TournamentActionTypes.Load),
         mergeMap(() => this.db.collection<Tournament>('tournaments', ref =>
-            ref.orderBy("name")).stateChanges()
+            ref.orderBy('name')).stateChanges()
             .pipe(
                 mergeMap(actions => actions),
                 map(action => {
                     switch (action.type) {
-                        case "added":
+                        case 'added':
                             return new tournamentActions.AddTournament({
                                 tournament: {
                                     ...action.payload.doc.data(),
@@ -79,7 +57,7 @@ export class TournamentEffects {
                                 index: action.payload.newIndex
                             });
 
-                        case "removed":
+                        case 'removed':
                             return new tournamentActions.RemoveTournament(action.payload.oldIndex);
 
                         default:
@@ -95,4 +73,26 @@ export class TournamentEffects {
                 })
             )
         ));
+
+    private getMatches(tournamentId: string): Observable<MatchWithId[]> {
+        return this.db.doc<Tournament>(`/tournaments/${tournamentId}`)
+            .collection<MatchInFireStore>('matches').snapshotChanges().pipe(
+                map(actions => actions.map(a => {
+                    const data = a.payload.doc.data();
+                    return {
+                        id: a.payload.doc.id,
+                        date: data.date && data.date.toDate(),
+                        team1Id: data.team1.id,
+                        team2Id: data.team2.id,
+                        team1Score: data.team1Score,
+                        team2Score: data.team2Score
+                    };
+                }))
+            );
+    }
+
+    private getTeams(tournamentId: string): Observable<DocumentChangeAction<Team>[]> {
+        return this.db.doc<Tournament>(`/tournaments/${tournamentId}`)
+            .collection<Team>('teams').snapshotChanges();
+    }
 }

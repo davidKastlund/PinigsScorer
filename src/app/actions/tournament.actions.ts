@@ -8,12 +8,12 @@ export enum TournamentActionTypes {
     Load = '[Tournament] Load',
     LoadSuccess = '[Tournament] LoadSuccess',
     LoadFail = '[Tournament] LoadFail',
-    AddTournament = "[Tournament] AddTournament",
-    RemoveTournament = "[Tournament] RemoveTournament",
-    ModifyTournament = "[Tournament] ModifyTournament",
-    SetMatches = "SetMatches",
-    SetTeams = "SetTeams"
-};
+    AddTournament = '[Tournament] AddTournament',
+    RemoveTournament = '[Tournament] RemoveTournament',
+    ModifyTournament = '[Tournament] ModifyTournament',
+    SetMatches = 'SetMatches',
+    SetTeams = 'SetTeams'
+}
 
 export class SetSelectTournamentId implements Action {
     readonly type = TournamentActionTypes.SetSelectTournamentId;
@@ -47,7 +47,7 @@ export class LoadTournamentsSuccess implements Action {
 
 export class AddTournament implements Action {
     readonly type = TournamentActionTypes.AddTournament;
-    constructor(public payload: {tournament:TournamentWithId, index:number}) { }
+    constructor(public payload: {tournament: TournamentWithId, index: number}) { }
 }
 
 
