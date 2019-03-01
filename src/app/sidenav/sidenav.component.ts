@@ -1,11 +1,11 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { ChangeDetectorRef, Component, OnDestroy, ViewChild, OnInit } from '@angular/core';
 import { TournamentWithId } from '../TournamentWithId';
-import { Observable, BehaviorSubject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { TournamentDataService } from '../tournament-data.service';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { MatSnackBar, MatDialog, MatSidenav } from '@angular/material';
-import { switchMap, map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { CreateNewTournamtentComponent } from '../create-new-tournamtent/create-new-tournamtent.component';
 import { Store, select } from '@ngrx/store';
 import { State } from '../reducers';
