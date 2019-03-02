@@ -10,7 +10,7 @@ import { CreateNewTournamtentComponent } from '../create-new-tournamtent/create-
 import { Store, select } from '@ngrx/store';
 import { State } from '../reducers';
 import { SetSelectTournamentId, LoadTournaments } from '../actions/tournament.actions';
-import { getSelectedTournament, getAllTournaments, getLoadTournamentsErrorMessage } from '../reducers/tournament.reducer';
+import { getSelectedTournament, getAllTournaments } from '../reducers/tournament.reducer';
 
 /** @title Responsive sidenav */
 @Component({
@@ -29,7 +29,6 @@ export class SidenavComponent implements OnDestroy, OnInit {
 
   private _mobileQueryListener: () => void;
   getTournamentsSubscription: Subscription;
-  errorMessage$: Observable<string>;
 
   constructor(changeDetectorRef: ChangeDetectorRef,
     media: MediaMatcher,
@@ -54,8 +53,6 @@ export class SidenavComponent implements OnDestroy, OnInit {
       });
 
     this.store.dispatch(new LoadTournaments());
-
-    this.errorMessage$ = this.store.pipe(select(getLoadTournamentsErrorMessage));
 
     this.tournaments$ = this.store.pipe(select(getAllTournaments));
 
