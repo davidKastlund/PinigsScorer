@@ -10,7 +10,7 @@ import { CreateNewTournamtentComponent } from '../create-new-tournamtent/create-
 import { Store, select } from '@ngrx/store';
 import { State } from '../reducers';
 import { SetSelectTournamentId, LoadTournaments } from '../actions/tournament.actions';
-import { getSelectedTournament, getAllTournaments } from '../reducers/tournament.reducer';
+import { getSelectedTournament, getAllTournaments, getIsLoading } from '../reducers/tournament.reducer';
 
 /** @title Responsive sidenav */
 @Component({
@@ -24,6 +24,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
   tournament$: Observable<TournamentWithId>;
   tournaments$: Observable<TournamentWithId[]>;
   isLoggedIn$: Observable<boolean>;
+  isLoading$: Observable<boolean>;
 
   @ViewChild('snav') sidenav: MatSidenav;
 
@@ -46,6 +47,7 @@ export class SidenavComponent implements OnDestroy, OnInit {
 
 
   ngOnInit(): void {
+    this.isLoading$ = this.store.pipe(select(getIsLoading));
     this.isLoggedIn$ = this.afAuth.user.pipe(map(u => !!u));
     this.tournamentData.getDefaultTournamentId()
       .subscribe(defaultId => {

@@ -15,6 +15,7 @@ import {
   MatBottomSheetModule,
   MatSidenavModule,
   MatListModule,
+  MatProgressSpinnerModule,
 } from '@angular/material';
 
 const materialModules = [
@@ -33,6 +34,7 @@ const materialModules = [
   MatBottomSheetModule,
   MatSidenavModule,
   MatListModule,
+  MatProgressSpinnerModule,
 ];
 
 @NgModule({

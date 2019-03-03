@@ -21,6 +21,10 @@
     </mat-sidenav>
 
     <mat-sidenav-content>
+      <div class="spinner-conatiner">
+          <mat-spinner *ngIf="isLoading$ | async"></mat-spinner>
+      </div>
+
       <div *ngIf="tournament$ | async as tournament">
         <app-tournament-detail [tournament]="tournament"></app-tournament-detail>
       </div>

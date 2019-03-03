@@ -1,10 +1,10 @@
-import * as TournamentActions from '../actions/tournament.actions';
-import { createSelector, createFeatureSelector } from '@ngrx/store';
-import { TournamentWithId } from './../TournamentWithId';
-import { MatchWithId } from './../MatchInFireStore';
-import { TeamId } from '../TeamId';
-import { CombinationHelperService } from './../combination-helper.service';
-import { TeamScoreHelperService } from '../team-score-helper.service';
+import * as TournamentActions from "../actions/tournament.actions";
+import { createSelector, createFeatureSelector } from "@ngrx/store";
+import { TournamentWithId } from "./../TournamentWithId";
+import { MatchWithId } from "./../MatchInFireStore";
+import { TeamId } from "../TeamId";
+import { CombinationHelperService } from "./../combination-helper.service";
+import { TeamScoreHelperService } from "../team-score-helper.service";
 
 export interface TournamentState {
   tournaments: TournamentWithId[];
@@ -12,16 +12,18 @@ export interface TournamentState {
   tournamentsContent: {
     [key: string]: { matches: MatchWithId[]; teams: TeamId[] };
   };
+  isLoading: boolean;
 }
 
 const initialState: TournamentState = {
   tournaments: [],
   selectedTournamentId: null,
   tournamentsContent: {},
+  isLoading: false
 };
 
 const getTournamentFeatureState = createFeatureSelector<TournamentState>(
-  'tournaments'
+  "tournaments"
 );
 export const getAllTournaments = createSelector(
   getTournamentFeatureState,
@@ -56,6 +58,11 @@ export const getTeams = createSelector(
     state.tournamentsContent[tournamentId]
       ? state.tournamentsContent[tournamentId].teams || []
       : []
+);
+
+export const getIsLoading = createSelector(
+  getTournamentFeatureState,
+  state => state.isLoading
 );
 
 const getNumberOfRounds = createSelector(
@@ -101,8 +108,18 @@ export function reducer(
         selectedTournamentId: action.payload,
         tournamentsContent: {
           ...state.tournamentsContent,
-          [action.payload]: state.tournamentsContent[action.payload] || {teams: [], matches: []}
+          [action.payload]: state.tournamentsContent[action.payload] || {
+            teams: [],
+            matches: []
+          }
         }
+      };
+    }
+
+    case TournamentActions.TournamentActionTypes.Load: {
+      return {
+        ...state,
+        isLoading: true
       };
     }
 
@@ -110,24 +127,26 @@ export function reducer(
       return {
         ...state,
         tournaments: action.payload,
+        isLoading: false
       };
     }
 
     case TournamentActions.TournamentActionTypes.AddTournament: {
       return {
         ...state,
+        isLoading: false,
         tournaments: insertItem(
           state.tournaments,
           action.payload.tournament,
           action.payload.index
-        ),
+        )
       };
     }
 
     case TournamentActions.TournamentActionTypes.RemoveTournament: {
       return {
         ...state,
-        tournaments: removeItem(state.tournaments, action.payload),
+        tournaments: removeItem(state.tournaments, action.payload)
       };
     }
 
